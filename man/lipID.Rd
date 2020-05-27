@@ -32,7 +32,7 @@ features. Ignored if \code{features} is \code{NULL}.}
 
 \item{partial_match_cutoff}{Numeric value between 0-1. Allows molecules that
 statisfied some, but not all of the rules to be retained. Default is \code{1},
-returning molecules with 100% match. Set to \code{0} to include molecules
+returning molecules with 100\% match. Set to \code{0} to include molecules
 that are MS1 matched as well (i.e no rules are net, only the precursor).}
 }
 \value{

@@ -16,7 +16,7 @@ and precursor M/Z in second column and a column for each potentail fragment.}
 input \code{file}}
 
 \item{and_cols}{Character or numeric vector for Columns containing all
-necessary fragments for ID. #' Defaults to 'all', i.e. all fragments
+necessary fragments for ID. Defaults to 'all', i.e. all fragments
 must be observed in data.}
 
 \item{or_cols}{Character or numeric vector for Columns containing fragments

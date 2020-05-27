@@ -148,7 +148,8 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2) {
     ] %>% as.data.frame()
 
   colnames(ret)[1:2] = colnames(features)[1:2]
-  features %>% left_join(ret) %>% left_join(ms2_data)
+  features %>% left_join(ret) %>% left_join(ms2_data) %>%
+    select(1,2, name, ms2_file, precursor, ms2_rt, partial_match, confirmed, ions_matched, everything())
 }
 
 # colnames used internally

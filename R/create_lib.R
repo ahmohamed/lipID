@@ -56,7 +56,7 @@ add_lib_collection <- function(rule_file, path = ".") {
 #' @param class_name Full name of the lipid class. Defaults to basename of the
 #' input `file`
 #' @param and_cols Character or numeric vector for Columns containing all
-#' necessary fragments for ID. #' Defaults to 'all', i.e. all fragments
+#' necessary fragments for ID. Defaults to 'all', i.e. all fragments
 #' must be observed in data.
 #' @param or_cols Character or numeric vector for Columns containing fragments
 #' where at least one fragment must be observed for ID. Defaults to 'rest',
