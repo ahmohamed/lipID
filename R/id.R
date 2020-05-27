@@ -44,7 +44,7 @@ lipID <- function(ms2_files, libs, features = NULL,
   ppm_tol=30, intensity_cutoff = 1000, mz_window=1, rt_window=2,
   partial_match_cutoff=1) {
   features <- readr::read_csv(features)
-  ms2_data <- read_ms2(ms2_file)
+  ms2_data <- read_ms2(ms2_files)
   ms2_annotated <- match_ms2(ms2_data, libs, ppm_tol, intensity_cutoff) %>%
     filter(partial_match >= partial_match_cutoff)
 

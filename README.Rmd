@@ -63,4 +63,3 @@ libs <- get_libs(mode = 'Pos', acq = 'dda')
 annotated <- lipID(ms2_file, libs, features_file)
 head(annotated)
 ```
-
