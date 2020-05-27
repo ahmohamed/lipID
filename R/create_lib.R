@@ -64,7 +64,7 @@ add_lib_collection <- function(rule_file, path = ".") {
 #' have no `or_cols`.
 #' @param mode Whether this library is for 'Pos' or 'Neg' mode. Default is
 #' 'Pos'.
-#' @param adduct Adduct of molecules in the library. Defualt is '[M+H]+'
+#' @param adduct Adduct of molecules in the library. Defualt is `'[M+H]+'`
 #' @param dda Whether this library is suitable for DDA data.
 #' @param aif Whether this library is suitable for AIF data.
 #'

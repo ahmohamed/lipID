@@ -27,7 +27,7 @@ have no \code{or_cols}.}
 \item{mode}{Whether this library is for 'Pos' or 'Neg' mode. Default is
 'Pos'.}
 
-\item{adduct}{Adduct of molecules in the library. Defualt is '\link{M+H}+'}
+\item{adduct}{Adduct of molecules in the library. Defualt is \code{'[M+H]+'}}
 
 \item{dda}{Whether this library is suitable for DDA data.}
 
