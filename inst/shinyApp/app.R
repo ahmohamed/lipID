@@ -1,0 +1,2 @@
+library(lipID)
+lipID::lipIDApp()

@@ -29,7 +29,13 @@ Imports:
     tidyr,
     plyr,
     readr,
-    magrittr
+    magrittr,
+    shiny,
+    shinyjs,
+    shinyalert,
+    shinyWidgets,
+    purrr,
+    DT
 Suggests: 
     testthat (>= 2.1.0)
 License: MIT + file LICENSE
