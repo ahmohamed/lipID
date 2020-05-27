@@ -1,0 +1,66 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# *lipID*: Fast Lipid Identification from MS MS spectra <img src="man/figures/logo.png" align="right" alt="" width="120" />
+
+
+<!-- badges: start -->
+[![Travis-CI Build Status](https://travis-ci.org/ahmohamed/lipidr.svg?branch=master)](https://travis-ci.org/ahmohamed/lipID)
+[![Coverage status](https://codecov.io/gh/ahmohamed/lipID/branch/master/graph/badge.svg)](https://codecov.io/github/ahmohamed/lipID?branch=master)
+<!-- badges: end -->
+
+lipID is an extremely fast implementation for rule-based matching of
+lipid compounds from MS/MS spctra. While the package logic and libraries
+is based on LipidMatch pakcage, the implementation has been completely
+rewritten to improve the performance (100x speed), and make it compatible
+with the latest R releases and tideverse workflows.`lipID` also allows
+users to add custom libraries to search against.
+
+## Installation
+
+You can install lipID from [GitHub](https://github.com/lipID) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("ahmohamed/lipID")
+```
+## input
+### MS2 files
+Files containing MS2 spectra should be converted to `ms2` format. You can use MSConvert to do so.
+
+### Features table (optional)
+A CSV file with MS1 features, intensities for each sample. First and second column should have MZ and RT values. ([see example here](inst/extdata/features.csv))
+
+<img src="man/figures/feature_table.png" width="600">
+
+## Quick example
+
+This is a basic example which shows you how to solve use lipID to annotate untargeted lipidomics:
+
+```{r example}
+library(lipID)
+
+# Replace with a path to your ms2 files or their containing folder.
+ms2_file <- "inst/extdata/ms2file.ms2"
+
+# Replace with a path to your features table CSV file
+features_file <- "inst/extdata/features.csv"
+
+# Get a list of libraries for matching
+libs <- get_libs(mode = 'Pos', acq = 'dda')
+
+annotated <- lipID(ms2_file, libs, features_file)
+head(annotated)
+```
+

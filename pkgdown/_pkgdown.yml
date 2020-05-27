@@ -1,0 +1,36 @@
+template:
+  params:
+    bootswatch: superhero
+
+navbar:
+  type: default
+  left:
+    - icon: fa-home fa-lg
+      href: index.html
+    - text: Reference
+      href: reference/index.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/ahmohamed/lipID
+
+reference:
+  - title: Quick Annotation
+    desc: One function to annotate lipidomics data
+    contents:
+    - '`lipID`'
+  - title: Libraries
+    desc: Select or add custom libraries for matching
+    contents:
+    - '`get_libs`'
+    - '`add_lib`'
+    - '`add_lib_collection`'
+  - title: MS matching
+    desc: Functions to perform MS1 and MS2 matching
+    contents:
+    - '`match_ms1`'
+    - '`match_ms2`'
+    - '`merge_ms2`'
+  - title: MS2 files
+    desc: Read ms2 files
+    contents:
+    - '`read_ms2`'

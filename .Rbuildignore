@@ -1,0 +1,15 @@
+^docs$
+^pkgdown*
+^appveyor\.yml$
+^codecov\.yml$
+^data-raw$
+^LICENSE\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.travis\.yml$
+^\.git*
+^\.BBSoptions$
+^vignettes/examples*
+^README\.Rmd$
+^_pkgdown\.yml$
+^pkgdown$
