@@ -13,7 +13,7 @@ lipID(ms2_files, libs, features = NULL, ppm_tol = 30,
 containing ms2 files}
 
 \item{libs}{Which libraries to match agaist. Should be the output of
-`[get_lib]` or `[create_lib]`}
+\code{[get_lib]} or \code{[create_lib]}}
 
 \item{features}{CSV file with the first two column corresponding to
 m/z and RT. Optional.}
@@ -25,31 +25,31 @@ library. Default tolerance is 30 ppm.}
 taken into account when matching. Default is 1000}
 
 \item{mz_window}{M/Z window for merging MS2 data with MS1 features.
-Ignored if `features` is `NULL`.}
+Ignored if \code{features} is \code{NULL}.}
 
 \item{rt_window}{Retention time window for merging MS2 data with MS1
-features. Ignored if `features` is `NULL`.}
+features. Ignored if \code{features} is \code{NULL}.}
 
 \item{partial_match_cutoff}{Numeric value between 0-1. Allows molecules that
-statisfied some, but not all of the rules to be retained. Default is `1`,
-returning molecules with 100% match. Set to `0` to include molecules
+statisfied some, but not all of the rules to be retained. Default is \code{1},
+returning molecules with 100% match. Set to \code{0} to include molecules
 that are MS1 matched as well (i.e no rules are net, only the precursor).}
 }
 \value{
 A data frame with these columns:\itemize{
-    \item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
-    \item name   Name of the matching molecules
-    \item partial_match   Numeric value between 0-1, indicating the
-    percentage of rules satisfied. `1` indicates matching all
-    required fragments and at least one optional fragment. `0` indicates
-    the molecule was matched based on MS1 only.
-    \item confirmed   Whether all matching rules were satisfied.
-  }
+\item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+\item name   Name of the matching molecules
+\item partial_match   Numeric value between 0-1, indicating the
+percentage of rules satisfied. \code{1} indicates matching all
+required fragments and at least one optional fragment. \code{0} indicates
+the molecule was matched based on MS1 only.
+\item confirmed   Whether all matching rules were satisfied.
+}
 If features table is provided, it is merged with the above columns.
 }
 \description{
 This is a wrapper function that executes the whole workflow
-with 2 inputs: `ms2_files` and optional `features` table.
+with 2 inputs: \code{ms2_files} and optional \code{features} table.
 }
 \examples{
 ms2_file <- system.file("extdata", "ms2file.ms2", package = "lipID")

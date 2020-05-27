@@ -13,7 +13,7 @@ add_lib(file, class_name = NULL, and_cols = "all", or_cols = "rest",
 and precursor M/Z in second column and a column for each potentail fragment.}
 
 \item{class_name}{Full name of the lipid class. Defaults to basename of the
-input `file`}
+input \code{file}}
 
 \item{and_cols}{Character or numeric vector for Columns containing all
 necessary fragments for ID. #' Defaults to 'all', i.e. all fragments
@@ -21,13 +21,13 @@ must be observed in data.}
 
 \item{or_cols}{Character or numeric vector for Columns containing fragments
 where at least one fragment must be observed for ID. Defaults to 'rest',
-i.e. all fragments not included in `and_cols`. Set argument to `FALSE` to
-have no `or_cols`.}
+i.e. all fragments not included in \code{and_cols}. Set argument to \code{FALSE} to
+have no \code{or_cols}.}
 
 \item{mode}{Whether this library is for 'Pos' or 'Neg' mode. Default is
 'Pos'.}
 
-\item{adduct}{Adduct of molecules in the library. Defualt is '[M+H]+'}
+\item{adduct}{Adduct of molecules in the library. Defualt is '\link{M+H}+'}
 
 \item{dda}{Whether this library is suitable for DDA data.}
 

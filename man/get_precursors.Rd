@@ -8,11 +8,11 @@ get_precursors(libs)
 }
 \arguments{
 \item{libs}{Which libraries to match agaist. Should be the output of
-`[get_libs]` or `[create_lib]`.}
+\code{[get_libs]} or \code{[create_lib]}.}
 }
 \value{
 Data frame with three columns: file (name of library),
-  name (Molecule name) and prec_mz (M/Z of the molecule precusor).
+name (Molecule name) and prec_mz (M/Z of the molecule precusor).
 }
 \description{
 Lists precusor masses of all molecules in library

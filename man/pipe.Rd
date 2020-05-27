@@ -7,7 +7,7 @@
 lhs \%>\% rhs
 }
 \value{
-Result of `rhs(lhs, ...)`.
+Result of \code{rhs(lhs, ...)}.
 }
 \description{
 See \code{magrittr::\link[magrittr:pipe]{\%>\%}} for details.

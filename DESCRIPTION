@@ -1,6 +1,6 @@
 Package: lipID
 Title: Fast Lipid Identification from MS MS spectra
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person(
         "Ahmed", "Mohamed", 
@@ -30,9 +30,10 @@ Imports:
     plyr,
     readr,
     magrittr
+Suggests: 
+    testthat (>= 2.1.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Suggests: 
-    testthat (>= 2.1.0)
+Roxygen: list(markdown = TRUE)

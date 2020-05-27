@@ -11,7 +11,7 @@ add_lib_collection(rule_file, path = ".")
 Use the template provided in the examples below.}
 
 \item{path}{Folder path containing a list of CSV files for libraries.
-All csv files listed in `rule_file` must be present. See examples below.}
+All csv files listed in \code{rule_file} must be present. See examples below.}
 }
 \value{
 A tibble with all added libraries. The created libraries

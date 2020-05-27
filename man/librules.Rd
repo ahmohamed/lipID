@@ -5,7 +5,7 @@
 \alias{librules}
 \title{A tibble with all available lipid libraries.
 Available libraries are based on LipidMatch package. User-defined libraries
-can be added with `add_lib` and `add_lib_collection`.}
+can be added with \code{add_lib} and \code{add_lib_collection}.}
 \format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 218 rows and 11 columns.}
 \usage{
 data("librules")
@@ -13,7 +13,7 @@ data("librules")
 \description{
 A tibble with all available lipid libraries.
 Available libraries are based on LipidMatch package. User-defined libraries
-can be added with `add_lib` and `add_lib_collection`.
+can be added with \code{add_lib} and \code{add_lib_collection}.
 }
 \examples{
 data("librules")

@@ -9,7 +9,7 @@ get_libs(mode = c("Pos", "Neg"), acq = c("dda", "aif"))
 \arguments{
 \item{mode}{Acquisition mode. Defualt is 'Pos'}
 
-\item{acq}{Acquisition type, either `dda` or `aif`. Defualt is 'dda'}
+\item{acq}{Acquisition type, either \code{dda} or \code{aif}. Defualt is 'dda'}
 }
 \value{
 A tibble containing all libraries for the chosen mode and type.

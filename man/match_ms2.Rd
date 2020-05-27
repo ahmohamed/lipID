@@ -7,10 +7,10 @@
 match_ms2(ms2, libs, ppm_tol = 30, intensity_cutoff = 1000)
 }
 \arguments{
-\item{ms2}{MS2 data frame. Should be the result of `read_ms2`.}
+\item{ms2}{MS2 data frame. Should be the result of \code{read_ms2}.}
 
 \item{libs}{Which libraries to match agaist. Should be the output of
-`[get_lib]` or `[create_lib]`}
+\code{[get_lib]} or \code{[create_lib]}}
 
 \item{ppm_tol}{Mass error tolerance between acquired fragments and
 library. Default tolerance is 30 ppm.}
@@ -20,21 +20,21 @@ taken into account when matching. Default is 1000}
 }
 \value{
 A data frame with these columns:\itemize{
-    \item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
-    \item name   Name of the matching molecules
-    \item partial_match   Numeric value between 0-1, indicating the
-    percentage of rules satisfied. `1` indicates matching all
-    required fragments and at least one optional fragment. `0` indicates
-    the molecule was matched based on MS1 only.
-    \item confirmed   Whether all matching rules were satisfied.
-  }
+\item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+\item name   Name of the matching molecules
+\item partial_match   Numeric value between 0-1, indicating the
+percentage of rules satisfied. \code{1} indicates matching all
+required fragments and at least one optional fragment. \code{0} indicates
+the molecule was matched based on MS1 only.
+\item confirmed   Whether all matching rules were satisfied.
+}
 This returned values contain all molecules that have a matching
 precursor regardless of whether the rules are met or not. If
 you want only molecules that met the rules, filter the dataframe
-with `confirmed == TRUE`.
+with \code{confirmed == TRUE}.
 }
 \description{
-Rule-based matching of lipid molecules in the provided libraries `libs`
+Rule-based matching of lipid molecules in the provided libraries \code{libs}
 using MS2 data (fragments).
 }
 \examples{
