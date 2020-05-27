@@ -49,21 +49,6 @@ features_file <- "inst/extdata/features.csv"
 libs <- get_libs(mode = 'Pos', acq = 'dda')
 
 annotated <- lipID(ms2_file, libs, features_file)
-#> Parsed with column specification:
-#> cols(
-#>   mz = col_double(),
-#>   rt = col_double(),
-#>   Sample1 = col_double(),
-#>   Sample2 = col_double(),
-#>   Sample3 = col_double(),
-#>   Sample4 = col_double(),
-#>   Sample5 = col_double(),
-#>   Sample6 = col_double()
-#> )
-#> Joining, by = c("mz", "ms2_rt")
-#> Joining, by = c("precursor", "ms2_rt")
-#> Joining, by = c("mz", "rt")
-#> Joining, by = c("precursor", "ms2_rt")
 head(annotated)
 #> # A tibble: 6 x 21
 #>      mz    rt Sample1 Sample2 Sample3 Sample4 Sample5 Sample6 precursor ms2_rt
