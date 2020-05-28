@@ -22,6 +22,14 @@
 #'
 #' # Get only the added libraries
 #' mylibs %>% dplyr::filter(user_defined)
+#'
+#' # Get built-in libraries as well as added ones for
+#' # speific polarity / acquisition mode.
+#' amended_libs %>% dplyr::filter(mode == 'Pos', dda)  # Pos DDA libs
+#' amended_libs %>% dplyr::filter(mode == 'Neg', aif)  # Neg AIF libs
+#'
+#' # Filter your own libraries by Polarity / Acquisition mode
+#' amended_libs %>% dplyr::filter(user_defined, mode == 'Pos', dda)  # Only user_defined / Pos / DDA
 add_lib_collection <- function(rule_file, path = ".") {
   bind_rows(.create_lib_collection(rule_file, path), librules)
 }
@@ -65,6 +73,11 @@ add_lib_collection <- function(rule_file, path = ".") {
 #'
 #' # Get only the added library
 #' amended_libs %>% dplyr::filter(user_defined)
+#'
+#' # Get built-in libraries as well as added ones for
+#' # speific polarity / acquisition mode.
+#' amended_libs %>% dplyr::filter(mode == 'Pos', dda)  # Pos DDA libs
+#' amended_libs %>% dplyr::filter(mode == 'Neg', aif)  # Neg AIF libs
 add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
   mode = c('Pos', 'Neg'), adduct = '[M+H]+', dda = TRUE, aif = TRUE){
   mode <- match.arg(mode)
