@@ -9,7 +9,7 @@ match_ms2(ms2, libs, ppm_tol = 30, intensity_cutoff = 1000)
 \arguments{
 \item{ms2}{MS2 data frame. Should be the result of \code{read_ms2}.}
 
-\item{libs}{Which libraries to match agaist. Should be the output of
+\item{libs}{Which libraries to match against. Should be the output of
 \code{[get_lib]} or \code{[create_lib]}}
 
 \item{ppm_tol}{Mass error tolerance between acquired fragments and
@@ -20,7 +20,7 @@ taken into account when matching. Default is 1000}
 }
 \value{
 A data frame with these columns:\itemize{
-\item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+\item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
 \item name   Name of the matching molecules
 \item partial_match   Numeric value between 0-1, indicating the
 percentage of rules satisfied. \code{1} indicates matching all

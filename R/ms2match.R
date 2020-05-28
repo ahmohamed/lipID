@@ -4,7 +4,7 @@
 #' using MS2 data (fragments).
 #'
 #' @param ms2 MS2 data frame. Should be the result of `read_ms2`.
-#' @param libs Which libraries to match agaist. Should be the output of
+#' @param libs Which libraries to match against. Should be the output of
 #'   `[get_lib]` or `[create_lib]`
 #' @param ppm_tol Mass error tolerance between acquired fragments and
 #'  library. Default tolerance is 30 ppm.
@@ -12,7 +12,7 @@
 #'   taken into account when matching. Default is 1000
 #'
 #' @return A data frame with these columns:\itemize{
-#'     \item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+#'     \item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
 #'     \item name   Name of the matching molecules
 #'     \item partial_match   Numeric value between 0-1, indicating the
 #'     percentage of rules satisfied. `1` indicates matching all
@@ -104,7 +104,7 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000) {
 #'
 #' @param features two column dataframe, m/z and RT
 #' @param ms2_data MS2 data frame. Should be the result of `read_ms2`.
-#' @param mz_window M/Z window.
+#' @param mz_window Quadropole isolation window (Daltons).
 #' @param rt_window Retention time window.
 #'
 #' @return A merged data frame containing both MS1 features with their

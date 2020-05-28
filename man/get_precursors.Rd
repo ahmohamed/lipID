@@ -2,20 +2,20 @@
 % Please edit documentation in R/ms1match.R
 \name{get_precursors}
 \alias{get_precursors}
-\title{Lists precusor masses of all molecules in library}
+\title{Lists precursor masses of all molecules in library}
 \usage{
 get_precursors(libs)
 }
 \arguments{
-\item{libs}{Which libraries to match agaist. Should be the output of
+\item{libs}{Which libraries to match against. Should be the output of
 \code{[get_libs]} or \code{[create_lib]}.}
 }
 \value{
 Data frame with three columns: file (name of library),
-name (Molecule name) and prec_mz (M/Z of the molecule precusor).
+name (Molecule name) and prec_mz (M/Z of the molecule precursor).
 }
 \description{
-Lists precusor masses of all molecules in library
+Lists precursor masses of all molecules in library
 }
 \examples{
 libs = get_libs()

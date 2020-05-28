@@ -6,7 +6,7 @@
 <!-- badges: start -->
 [![Travis-CI Build Status](https://travis-ci.org/ahmohamed/lipidr.svg?branch=master)](https://travis-ci.org/ahmohamed/lipID) [![Coverage status](https://codecov.io/gh/ahmohamed/lipID/branch/master/graph/badge.svg)](https://codecov.io/github/ahmohamed/lipID?branch=master) <!-- badges: end -->
 
-lipID is an extremely fast implementation for rule-based matching of lipid compounds from MS/MS spctra. While the package logic and libraries is based on LipidMatch pakcage, the implementation has been completely rewritten to improve the performance (100x speed), and make it compatible with the latest R releases and tideverse workflows.`lipID` also allows users to add custom libraries to search against.
+lipID is an extremely fast implementation for rule-based matching of lipid compounds from MS/MS spectra. While the package logic and libraries is based on LipidMatch package, the implementation has been completely rewritten to improve the performance (100x speed), and make it compatible with the latest R releases and tidyverse workflows.`lipID` also allows users to add custom libraries to search against.
 
 Installation
 ------------
@@ -31,8 +31,19 @@ A CSV file with MS1 features, intensities for each sample. First and second colu
 
 <img src="man/figures/feature_table.png" width="600">
 
-Quick example
--------------
+Usage
+-----
+
+### Shiny App
+
+This is an easy web interface that allows users to directly import and export results from `lipID`. To launch the app in browser:
+
+``` r
+library(lipID)
+lipIDApp()
+```
+
+### Quick example in R
 
 This is a basic example which shows you how to solve use lipID to annotate untargeted lipidomics:
 
@@ -51,15 +62,16 @@ libs <- get_libs(mode = 'Pos', acq = 'dda')
 annotated <- lipID(ms2_file, libs, features_file)
 head(annotated)
 #> # A tibble: 6 x 21
-#>      mz    rt Sample1 Sample2 Sample3 Sample4 Sample5 Sample6 precursor ms2_rt
-#>   <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>     <dbl>  <dbl>
-#> 1  623.  36.6  1.15e7  3.14e7  1.72e6  2.63e7  2.40e5  1.46e8       NA    NA  
-#> 2  649.  37.1  3.03e6  4.23e6  2.54e6  4.81e6  3.44e7  1.17e6       NA    NA  
-#> 3  651.  38.1  2.72e6  7.18e4  1.39e6  4.21e6  1.87e7  1.53e7       NA    NA  
-#> 4  679.  26.9  7.82e4  9.43e5  4.02e5  1.12e7  2.87e6  2.36e6       NA    NA  
-#> 5  691.  30.4  3.21e6  1.83e6  9.10e5  2.96e7  7.53e5  2.05e6      691.   30.6
-#> 6  691.  30.4  3.21e6  1.83e6  9.10e5  2.96e7  7.53e5  2.05e6      691.   30.7
-#> # … with 11 more variables: ms2_file <fct>, name <chr>, n_and <int>,
+#>      mz    rt name  ms2_file precursor ms2_rt partial_match confirmed
+#>   <dbl> <dbl> <chr> <fct>        <dbl>  <dbl>         <dbl> <lgl>    
+#> 1  623.  36.6 <NA>  <NA>           NA    NA              NA NA       
+#> 2  649.  37.1 <NA>  <NA>           NA    NA              NA NA       
+#> 3  651.  38.1 <NA>  <NA>           NA    NA              NA NA       
+#> 4  679.  26.9 <NA>  <NA>           NA    NA              NA NA       
+#> 5  691.  30.4 PE(1… ms2file       691.   30.6             1 TRUE     
+#> 6  691.  30.4 Plas… ms2file       691.   30.7             1 TRUE     
+#> # … with 13 more variables: ions_matched <chr>, Sample1 <dbl>, Sample2 <dbl>,
+#> #   Sample3 <dbl>, Sample4 <dbl>, Sample5 <dbl>, Sample6 <dbl>, n_and <int>,
 #> #   n_or <int>, n_and_true <int>, n_or_true <int>, and_cols <lgl>,
-#> #   or_cols <lgl>, partial_match <dbl>, confirmed <lgl>, ions_matched <chr>
+#> #   or_cols <lgl>
 ```

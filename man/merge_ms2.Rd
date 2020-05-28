@@ -11,7 +11,7 @@ merge_ms2(features, ms2_data, mz_window = 1, rt_window = 2)
 
 \item{ms2_data}{MS2 data frame. Should be the result of \code{read_ms2}.}
 
-\item{mz_window}{M/Z window.}
+\item{mz_window}{Quadropole isolation window (Daltons).}
 
 \item{rt_window}{Retention time window.}
 }

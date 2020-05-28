@@ -2,7 +2,7 @@
 #'
 #'
 #' @param features two column dataframe, m/z and RT
-#' @param libs Which libraries to match agaist. Should be the output of
+#' @param libs Which libraries to match against. Should be the output of
 #' `[get_lib]` or `[create_lib]`
 #' @param mz_tol M/Z tolerance for matching, in Da. Default 0.025 Da.
 #' @import data.table
@@ -34,13 +34,13 @@ match_ms1 <- function(features, libs, mz_tol = 0.025) {
   features %>% left_join(ret)
 }
 
-#' Lists precusor masses of all molecules in library
+#' Lists precursor masses of all molecules in library
 #'
-#' @param libs Which libraries to match agaist. Should be the output of
+#' @param libs Which libraries to match against. Should be the output of
 #'   `[get_libs]` or `[create_lib]`.
 #'
 #' @return Data frame with three columns: file (name of library),
-#'   name (Molecule name) and prec_mz (M/Z of the molecule precusor).
+#'   name (Molecule name) and prec_mz (M/Z of the molecule precursor).
 #' @export
 #'
 #' @examples

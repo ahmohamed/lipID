@@ -10,7 +10,7 @@ add_lib(file, class_name = NULL, and_cols = "all", or_cols = "rest",
 }
 \arguments{
 \item{file}{CSV file or a data frame, with lipid names as first column,
-and precursor M/Z in second column and a column for each potentail fragment.}
+and precursor M/Z in second column and a column for each potential fragment.}
 
 \item{class_name}{Full name of the lipid class. Defaults to basename of the
 input \code{file}}
@@ -27,7 +27,7 @@ have no \code{or_cols}.}
 \item{mode}{Whether this library is for 'Pos' or 'Neg' mode. Default is
 'Pos'.}
 
-\item{adduct}{Adduct of molecules in the library. Defualt is \code{'[M+H]+'}}
+\item{adduct}{Adduct of molecules in the library. Default is \code{'[M+H]+'}}
 
 \item{dda}{Whether this library is suitable for DDA data.}
 

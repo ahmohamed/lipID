@@ -11,7 +11,7 @@ read_ms2(files)
 containing ms2 files}
 }
 \value{
-data frame with 6 columns: file name, scan_idx, precusor mz, rt,
+data frame with 6 columns: file name, scan_idx, precursor mz, rt,
 fragment mz and fragment intensity.
 }
 \description{

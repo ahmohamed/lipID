@@ -2,7 +2,7 @@
 % Please edit documentation in R/id.R
 \name{lipID}
 \alias{lipID}
-\title{Annotate untargted lipidmics using rule-based matching}
+\title{Annotate untargeted lipidomics using rule-based matching}
 \usage{
 lipID(ms2_files, libs, features = NULL, ppm_tol = 30,
   intensity_cutoff = 1000, mz_window = 1, rt_window = 2,
@@ -12,10 +12,10 @@ lipID(ms2_files, libs, features = NULL, ppm_tol = 30,
 \item{ms2_files}{a character vector of file names or directory
 containing ms2 files}
 
-\item{libs}{Which libraries to match agaist. Should be the output of
+\item{libs}{Which libraries to match against. Should be the output of
 \code{[get_lib]} or \code{[create_lib]}}
 
-\item{features}{CSV file with the first two column corresponding to
+\item{features}{CSV file with the first two columns corresponding to
 m/z and RT. Optional.}
 
 \item{ppm_tol}{Mass error tolerance between acquired MS2 fragments and
@@ -31,13 +31,13 @@ Ignored if \code{features} is \code{NULL}.}
 features. Ignored if \code{features} is \code{NULL}.}
 
 \item{partial_match_cutoff}{Numeric value between 0-1. Allows molecules that
-statisfied some, but not all of the rules to be retained. Default is \code{1},
+satisfied some, but not all of the rules to be retained. Default is \code{1},
 returning molecules with 100\% match. Set to \code{0} to include molecules
 that are MS1 matched as well (i.e no rules are net, only the precursor).}
 }
 \value{
 A data frame with these columns:\itemize{
-\item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+\item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
 \item name   Name of the matching molecules
 \item partial_match   Numeric value between 0-1, indicating the
 percentage of rules satisfied. \code{1} indicates matching all

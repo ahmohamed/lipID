@@ -3,7 +3,7 @@
 #' @param files a character vector of file names or directory
 #'   containing ms2 files
 #'
-#' @return data frame with 6 columns: file name, scan_idx, precusor mz, rt,
+#' @return data frame with 6 columns: file name, scan_idx, precursor mz, rt,
 #'   fragment mz and fragment intensity.
 #'
 #' @importFrom plyr ldply

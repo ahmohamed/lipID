@@ -9,7 +9,7 @@ match_ms1(features, libs, mz_tol = 0.025)
 \arguments{
 \item{features}{two column dataframe, m/z and RT}
 
-\item{libs}{Which libraries to match agaist. Should be the output of
+\item{libs}{Which libraries to match against. Should be the output of
 \code{[get_lib]} or \code{[create_lib]}}
 
 \item{mz_tol}{M/Z tolerance for matching, in Da. Default 0.025 Da.}

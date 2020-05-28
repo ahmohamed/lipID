@@ -23,10 +23,10 @@ NULL
 #' Fast Lipid Identification from MS/MS spectra
 #'
 #' `lipID` is an extremely fast implementation for rule-based matching of
-#' lipid compounds from MS/MS spctra. While the package logic and libraries
-#' is based on LipidMatch pakcage, the implementation has been completely
+#' lipid compounds from MS/MS spectra. While the package logic and libraries
+#' is based on LipidMatch package, the implementation has been completely
 #' rewritten to improve the performance (100x speed), and make it compatible
-#' with the latest R releases and tideverse workflows.`lipID` also allows
+#' with the latest R releases and tidyverse workflows.`lipID` also allows
 #' users to add custom libraries to search against.
 #'
 #' @author Ahmed Mohamed \email{ahmed.mohamed@@qimrberghofer.edu.au}

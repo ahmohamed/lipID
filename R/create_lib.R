@@ -23,36 +23,13 @@
 #' # Get only the added libraries
 #' mylibs %>% dplyr::filter(user_defined)
 add_lib_collection <- function(rule_file, path = ".") {
-  get_cols <- function(idx, file) {
-    idx <- as.numeric(unlist(strsplit(idx, ";")))
-    list(colnames(liblist[[file]])[ idx ])
-  }
-
-  librules <- readr::read_csv(rule_file)
-  colnames(librules) <- c(
-    "file", "and_cols", "or_cols", "dda", "aif",
-    "class_only", "mode", "adduct", "class_name"
-  )
-
-  liblist <- lapply(file.path(path, librules$file), readr::read_csv)
-  names(liblist) <- librules$file
-
-  librules <- librules %>% rowwise %>% mutate(
-    and_cols=get_cols(as.character(and_cols), file[[1]]),
-    or_cols=get_cols(as.character(or_cols), file[[1]])
-  ) %>% ungroup() %>%
-    mutate(ions=liblist[file])
-  if (all(is.na(librules$or_cols))) {
-    librules$or_cols <- list(character(0))
-  }
-  librules$user_defined = TRUE
-  librules
+  bind_rows(.create_lib_collection(rule_file, path), librules)
 }
 
 #' Add a custom library for matching
 #'
 #' @param file CSV file or a data frame, with lipid names as first column,
-#' and precursor M/Z in second column and a column for each potentail fragment.
+#' and precursor M/Z in second column and a column for each potential fragment.
 #' @param class_name Full name of the lipid class. Defaults to basename of the
 #' input `file`
 #' @param and_cols Character or numeric vector for Columns containing all
@@ -64,7 +41,7 @@ add_lib_collection <- function(rule_file, path = ".") {
 #' have no `or_cols`.
 #' @param mode Whether this library is for 'Pos' or 'Neg' mode. Default is
 #' 'Pos'.
-#' @param adduct Adduct of molecules in the library. Defualt is `'[M+H]+'`
+#' @param adduct Adduct of molecules in the library. Default is `'[M+H]+'`
 #' @param dda Whether this library is suitable for DDA data.
 #' @param aif Whether this library is suitable for AIF data.
 #'
@@ -134,8 +111,8 @@ add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
 
 #' Get libraries for matching with specific mode and type
 #'
-#' @param mode Acquisition mode. Defualt is 'Pos'
-#' @param acq Acquisition type, either `dda` or `aif`. Defualt is 'dda'
+#' @param mode Acquisition mode. Default is 'Pos'
+#' @param acq Acquisition type, either `dda` or `aif`. Default is 'dda'
 #'
 #' @return A tibble containing all libraries for the chosen mode and type.
 #' @export
@@ -153,6 +130,32 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
   libs[libs$mode ==  mode, ]
 }
 
+.create_lib_collection <- function(rule_file, path = ".") {
+  get_cols <- function(idx, file) {
+    idx <- as.numeric(unlist(strsplit(idx, ";")))
+    list(colnames(liblist[[file]])[ idx ])
+  }
+
+  librules <- readr::read_csv(rule_file)
+  colnames(librules) <- c(
+    "file", "and_cols", "or_cols", "dda", "aif",
+    "class_only", "mode", "adduct", "class_name"
+  )
+
+  liblist <- lapply(file.path(path, librules$file), readr::read_csv)
+  names(liblist) <- librules$file
+
+  librules <- librules %>% rowwise %>% mutate(
+    and_cols=get_cols(as.character(and_cols), file[[1]]),
+    or_cols=get_cols(as.character(or_cols), file[[1]])
+  ) %>% ungroup() %>%
+    mutate(ions=liblist[file])
+  if (all(is.na(librules$or_cols))) {
+    librules$or_cols <- list(character(0))
+  }
+  librules$user_defined = TRUE
+  librules
+}
 
 .check_col_specs <- function(data, cols) {
   tryCatch(

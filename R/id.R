@@ -1,13 +1,13 @@
-#' Annotate untargted lipidmics using rule-based matching
+#' Annotate untargeted lipidomics using rule-based matching
 #'
 #' This is a wrapper function that executes the whole workflow
 #' with 2 inputs: `ms2_files` and optional `features` table.
 #'
 #' @param ms2_files a character vector of file names or directory
 #'   containing ms2 files
-#' @param libs Which libraries to match agaist. Should be the output of
+#' @param libs Which libraries to match against. Should be the output of
 #'   `[get_lib]` or `[create_lib]`
-#' @param features CSV file with the first two column corresponding to
+#' @param features CSV file with the first two columns corresponding to
 #' m/z and RT. Optional.
 #' @param ppm_tol Mass error tolerance between acquired MS2 fragments and
 #'  library. Default tolerance is 30 ppm.
@@ -18,12 +18,12 @@
 #' @param rt_window Retention time window for merging MS2 data with MS1
 #' features. Ignored if `features` is `NULL`.
 #' @param partial_match_cutoff Numeric value between 0-1. Allows molecules that
-#' statisfied some, but not all of the rules to be retained. Default is `1`,
+#' satisfied some, but not all of the rules to be retained. Default is `1`,
 #' returning molecules with 100\% match. Set to `0` to include molecules
 #' that are MS1 matched as well (i.e no rules are net, only the precursor).
 #'
 #' @return A data frame with these columns:\itemize{
-#'     \item ms2_file, precursor, ms2_rt   File, precusor M/Z, precusor RT
+#'     \item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
 #'     \item name   Name of the matching molecules
 #'     \item partial_match   Numeric value between 0-1, indicating the
 #'     percentage of rules satisfied. `1` indicates matching all
