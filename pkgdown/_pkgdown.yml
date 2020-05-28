@@ -14,6 +14,10 @@ navbar:
       href: https://github.com/ahmohamed/lipID
 
 reference:
+  - title: Shiny Application
+    desc: ~
+    contents:
+    - '`lipIDApp`'
   - title: Quick Annotation
     desc: One function to annotate lipidomics data
     contents:

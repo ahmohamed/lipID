@@ -52,6 +52,25 @@ quietly <- function(.f) {
     return(res$result)
   }
 }
+how_to_use <- function() {
+
+  tagList(
+    tags$h1('How to use:'),
+    tags$h3('1. Prepare you MS2 files:'),
+    tags$p('Use MSConvert to format your raw MS2 data as *.ms2 files. ',
+      'Upload all your ms2 files here.'),
+    tags$h3('2. Select your libraries:'),
+    tags$p('Choose the appropriate polarity and lipid classes that you want to search.'),
+    tags$h3('3. Prepare your feature table:'),
+    tags$p('Feature table should be a CSV file, with the first and second columns',
+      ' corresponding to m/z and RT, similar to the example below. This is optional.'),
+    tags$img(
+      id = "ftable",
+      src = "feature_table.png"
+    ),
+    tags$h3('4. Start matching!')
+  )
+}
 
 get_ui <- function(init_libs) {
   init_libs <- get_libs()
@@ -60,20 +79,33 @@ get_ui <- function(init_libs) {
     singleton(tags$head(
       tags$style(
         ".datatables.html-widget{overflow-x:auto;}",
-        ".pg-loading-screen {background-color: #17a2b8 !important;}")
+        ".pg-loading-screen {background-color: #17a2b8 !important;}",
+        "#ftable {max-width: 500px; width: 100%; height: auto}"
+      ),
+      tags$head(tags$title("lipID: Fast lipid ID from MS/MS spectra"))
     )),
-    fluidPage(
+    dashboardPage(skin = "black",
 
       # Application title
-      titlePanel("lipID: Fast Lipid Identification from MS/MS spectra"),
-
-      sidebarLayout(
-        sidebarPanel(
+      dashboardHeader(title=tags$span(
+        tags$img(
+          src = "logo.png",
+          height='40'
+        ),
+        "lipID: Fast lipid ID from MS/MS spectra"
+        ),
+        titleWidth = '100%'
+      ),
+      dashboardSidebar(disable = TRUE),
+      dashboardBody(fluidRow(
+        box(status = "primary", width = 4,
           fileInput('ms2_file', "Upload MS2 files", multiple = TRUE,
             accept = c(".ms2")
           ),
           numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
           numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
+          sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%"),
+
           radioGroupButtons(
             inputId = "libmode",
             label = "Polarity",
@@ -88,19 +120,28 @@ get_ui <- function(init_libs) {
           fileInput('features_file', "Upload features table",
             accept = c("txt/csv", "text/comma-separated-values,text/plain", ".csv")
           ),
-          numericInput('mz_window', 'M/Z widnow (Daltons) for merging MS2 annotations with feature table', 1, 0, 10, 0.01),
-          numericInput('rt_window', 'RT widnow (minutes) for merging MS2 annotations with feature table', 1, 0, 10, 0.1),
+          sliderInput(
+            'mz_window',
+            'Quadropole isolation window (Daltons)',
+            0, 10, 1, 0.01, post=" Da"),
+          sliderInput('rt_window',
+            'RT widnow (minutes) for merging MS2 annotations with feature table',
+            0, 10, 1, 0.1, post=" min"),
           gobttn('go', 'GIMME IDs!')
-        ),
-        # Show a plot of the generated distribution
-        mainPanel(
-          DTOutput('tbl')
+        ), #end box side
+        box(status = "danger", width = 8,
+          uiOutput('result')
         )
-      )
-    ))
+      )) #dashboard body
+    ) #page
+  )# taglist
 }
 
 server <- function(input, output, session) {
+  output$result <- renderUI({
+    how_to_use()
+  })
+
   libs <- get_libs()
   observeEvent(input$libmode, {
     print(input$libmode)
@@ -127,6 +168,8 @@ server <- function(input, output, session) {
     }
 
     withLoading(session, "go", {
+      output$result <- renderUI(DTOutput('tbl'))
+
       showNotification("Reading MS2 files", duration = 20)
       ms2_files <- setNames(input$ms2_file$datapath, input$ms2_file$name)
       print("ms2_files")
@@ -136,7 +179,7 @@ server <- function(input, output, session) {
       showNotification("Matching against lipid libraries", duration = 30)
       selected_libs <- libs %>% filter(file %in% input$liblist)
       ms2_annotated <- match_ms2(ms2_data, selected_libs, input$ppm_tol, input$intensity_cutoff) %>%
-        filter(partial_match >= 1)#input$partial_match_cutoff)
+        filter(partial_match >= (input$partial_match_cutoff/100))
 
       if(!is.null(input$features_file)){
         showNotification("Merging MS2 annotations with feature table", duration = 10)
@@ -156,19 +199,23 @@ server <- function(input, output, session) {
   })
 }
 
-
+.launchApp <- function(){
+  shinyApp(ui = get_ui(), server = server)
+}
 
 #' Launch Shiny Web App  interface
 #'
 #' @return None
 #' @import shiny
+#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar dashboardBody box
 #' @importFrom shinyjs useShinyjs hidden
 #' @importFrom shinyalert useShinyalert shinyalert
 #' @importFrom shinyWidgets actionBttn radioGroupButtons pickerInput updatePickerInput
 #' @importFrom DT datatable formatSignif renderDT DTOutput
 #' @export
 lipIDApp <- function(){
-  shinyApp(ui = get_ui(), server = server)
+  appDir <- system.file("shinyApp", package = "lipID")
+  runApp(appDir = appDir)
 }
 
 

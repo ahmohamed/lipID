@@ -1,2 +1,2 @@
 library(lipID)
-lipID::lipIDApp()
+lipID:::.launchApp()
