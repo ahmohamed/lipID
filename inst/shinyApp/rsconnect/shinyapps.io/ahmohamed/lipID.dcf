@@ -1,10 +1,10 @@
 name: lipID
-title:
+title: lipID: Fast lipid ID from MS/MS spectra
 username:
 account: ahmohamed
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2369129
-bundleId: 3198836
+bundleId: 3198903
 url: https://ahmohamed.shinyapps.io/lipID/
-when: 1590642463.12794
+when: 1590644267.69576

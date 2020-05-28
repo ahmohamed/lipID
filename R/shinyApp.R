@@ -125,7 +125,7 @@ get_ui <- function(init_libs) {
             'Quadropole isolation window (Daltons)',
             0, 10, 1, 0.01, post=" Da"),
           sliderInput('rt_window',
-            'RT widnow (minutes) for merging MS2 annotations with feature table',
+            'RT window (minutes) for merging MS2 annotations with feature table',
             0, 10, 1, 0.1, post=" min"),
           gobttn('go', 'GIMME IDs!')
         ), #end box side
@@ -193,7 +193,18 @@ server <- function(input, output, session) {
         req(tbl)
         tbl %>% select(-n_and, -n_or, -n_and_true, -n_or_true, -and_cols, -or_cols) %>%
           datatable(extensions = 'Buttons', rownames = FALSE,
-            options = list(dom = 'Bfrtip', buttons=c("copy", "csv", "excel"))) %>%
+            options = list(
+              dom = 'Bfrtip',
+              buttons=list('copy', list(
+                extend = 'collection',
+                buttons = list(
+                  list(extend = 'csv', filename = 'lipID_annotated'),
+                  list(extend = 'excel', filename = 'lipID_annotated', title = "Exported from lipID"),
+                  list(extend = 'pdf', filename = 'lipID_annotated', title = "Exported from lipID")
+                ),
+                text = 'Download'
+              ))
+          )) %>%
           formatSignif(sapply(., is.numeric), digits = 3)
       }, server = FALSE)
     })
