@@ -1,4 +1,4 @@
-options(DT.options = list(dom = 'Bfrtip', buttons=c("copy", "csv", "excel")))
+# options(DT.options = list(dom = 'Bfrtip', buttons=c("copy", "csv", "excel")))
 gobttn <- function(id, label) {
   actionBttn(id, loadingLabel(id, label),
     style="bordered", color = "primary", block = TRUE
@@ -192,7 +192,8 @@ server <- function(input, output, session) {
       output$tbl <- renderDT({
         req(tbl)
         tbl %>% select(-n_and, -n_or, -n_and_true, -n_or_true, -and_cols, -or_cols) %>%
-          datatable(extensions = 'Buttons', rownames = FALSE) %>%
+          datatable(extensions = 'Buttons', rownames = FALSE,
+            options = list(dom = 'Bfrtip', buttons=c("copy", "csv", "excel"))) %>%
           formatSignif(sapply(., is.numeric), digits = 3)
       }, server = FALSE)
     })
