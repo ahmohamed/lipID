@@ -36,9 +36,9 @@ mylibs \%>\% dplyr::filter(user_defined)
 
 # Get built-in libraries as well as added ones for
 # speific polarity / acquisition mode.
-amended_libs \%>\% dplyr::filter(mode == 'Pos', dda)  # Pos DDA libs
-amended_libs \%>\% dplyr::filter(mode == 'Neg', aif)  # Neg AIF libs
+mylibs \%>\% dplyr::filter(mode == 'Pos', dda)  # Pos DDA libs
+mylibs \%>\% dplyr::filter(mode == 'Neg', aif)  # Neg AIF libs
 
 # Filter your own libraries by Polarity / Acquisition mode
-amended_libs \%>\% dplyr::filter(user_defined, mode == 'Pos', dda)  # Only user_defined / Pos / DDA
+mylibs \%>\% dplyr::filter(user_defined, mode == 'Pos', dda)  # Only user_defined / Pos / DDA
 }

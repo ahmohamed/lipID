@@ -33,8 +33,6 @@ matrix:
   allow_failures:
     - os: osx
 
-bioc_check: true
-
 env:
  global:
    - CRAN: http://cran.rstudio.com
