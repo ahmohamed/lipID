@@ -56,6 +56,8 @@ add_lib_collection <- function(rule_file, path = ".") {
 #' @return A tibble with a single row containing the library information and
 #' data. The created library is also added to the full list of available
 #' libraries.
+#'
+#' @importFrom tidyr drop_na
 #' @export
 #'
 #' @examples
@@ -84,7 +86,7 @@ add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
   if (is.null(class_name)) {
     class_name = sub("\\.csv$", "", basename(file))
   }
-  lib_data = read_csv(file)
+  lib_data = read_csv(file) %>% drop_na()
   first_col_name <- colnames(lib_data)[[1]]
   fragment_cols <- colnames(lib_data)[-1]
 
@@ -155,7 +157,9 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
     "class_only", "mode", "adduct", "class_name"
   )
 
-  liblist <- lapply(file.path(path, librules$file), readr::read_csv)
+  liblist <- lapply(file.path(path, librules$file), function(f) {
+    drop_na(readr::read_csv(f))
+  })
   names(liblist) <- librules$file
 
   librules <- librules %>% rowwise %>% mutate(
@@ -177,6 +181,16 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
       stop('All columns speficied in and_cols, ',
         'or_cols must be present in the library')
   )
+}
+
+.get_sum_comp <- function(names) {
+  .en <- function(...) paste0("(", ..., ")")
+  csep = "[/-_]"
+  dbond_config = "\\((?:\\d{1,2}[ZE][,]*)+\\)"
+  chain_notes = "\\((?:\\d{1,2}[^)]*)+\\)"
+  chain_p = paste0("[dth]?\\d{1,2}:\\d{1,2}",.en("?:", chain_notes), "*")
+  chain_multi_p = paste0(.en("?:", chain_p, csep, "*"), "+")
+  fas = sub("^.*\\(([^)]+)\\).*$", "\\1", names)
 }
 
 # colnames used internally

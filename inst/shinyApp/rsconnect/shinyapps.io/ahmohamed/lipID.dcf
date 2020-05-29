@@ -5,6 +5,6 @@ account: ahmohamed
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2369129
-bundleId: 3198903
+bundleId: 3199004
 url: https://ahmohamed.shinyapps.io/lipID/
-when: 1590644267.69576
+when: 1590645964.96447

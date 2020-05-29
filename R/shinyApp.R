@@ -122,7 +122,7 @@ get_ui <- function(init_libs) {
           ),
           sliderInput(
             'mz_window',
-            'Quadropole isolation window (Daltons)',
+            'Quadrupole isolation window (Daltons)',
             0, 10, 1, 0.01, post=" Da"),
           sliderInput('rt_window',
             'RT window (minutes) for merging MS2 annotations with feature table',

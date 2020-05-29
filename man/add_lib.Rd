@@ -56,4 +56,9 @@ amended_libs
 
 # Get only the added library
 amended_libs \%>\% dplyr::filter(user_defined)
+
+# Get built-in libraries as well as added ones for
+# speific polarity / acquisition mode.
+amended_libs \%>\% dplyr::filter(mode == 'Pos', dda)  # Pos DDA libs
+amended_libs \%>\% dplyr::filter(mode == 'Neg', aif)  # Neg AIF libs
 }

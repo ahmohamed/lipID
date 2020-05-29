@@ -1,5 +1,6 @@
 #' @importFrom dplyr select filter select mutate summarise rename left_join
 #' @importFrom dplyr do distinct rowwise group_by ungroup bind_rows everything
+#' @importFrom dplyr arrange
 #' @importFrom tibble tibble enframe
 #' @importFrom stats median setNames
 NULL
