@@ -31,6 +31,19 @@
 #' # Filter your own libraries by Polarity / Acquisition mode
 #' mylibs %>% dplyr::filter(user_defined, mode == 'Pos', dda)  # Only user_defined / Pos / DDA
 add_lib_collection <- function(rule_file, path = ".") {
+  libs <- readr::read_csv(rule_file)
+  if (nrow(libs) < 2) {
+    return(add_lib(
+      file = file.path(path, libs$file[[1]]),
+      class_name = libs$class_name[[1]],
+      and_cols = as.numeric(strsplit(libs$and_cols, ";")[[1]]),
+      or_cols = as.numeric(strsplit(libs$or_cols, ";")[[1]]),
+      mode = libs$mode[[1]],
+      adduct = libs$adduct[[1]],
+      dda = libs$dda[[1]],
+      aif = libs$aif[[1]]
+    ))
+  }
   bind_rows(.create_lib_collection(rule_file, path), librules)
 }
 
@@ -57,7 +70,9 @@ add_lib_collection <- function(rule_file, path = ".") {
 #' data. The created library is also added to the full list of available
 #' libraries.
 #'
-#' @importFrom tidyr drop_na
+#' @importFrom tidyr drop_na unite hoist chop unnest
+#' @importFrom stringr str_extract str_match_all str_replace
+#' @importFrom stringi stri_replace_first_fixed
 #' @export
 #'
 #' @examples
@@ -86,7 +101,8 @@ add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
   if (is.null(class_name)) {
     class_name = sub("\\.csv$", "", basename(file))
   }
-  lib_data = read_csv(file) %>% drop_na()
+  lib_data = read_csv(file) %>% drop_na() %>%
+    .join_sum_comp()
   first_col_name <- colnames(lib_data)[[1]]
   fragment_cols <- colnames(lib_data)[-1]
 
@@ -158,9 +174,10 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
   )
 
   liblist <- lapply(file.path(path, librules$file), function(f) {
-    drop_na(readr::read_csv(f))
+    readr::read_csv(f) %>% distinct()
   })
   names(liblist) <- librules$file
+
 
   librules <- librules %>% rowwise %>% mutate(
     and_cols=get_cols(as.character(and_cols), file[[1]]),
@@ -171,7 +188,11 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
     librules$or_cols <- list(character(0))
   }
   librules$user_defined = TRUE
-  librules
+  librules %>%
+    left_join(.join_sum_comp_nested(.), by = "file") %>%
+    mutate(ions = mapply(bind_cols,
+      ions, sum_composition = sum_composition, odd_chain = odd_chain, modifs = modifs)) %>%
+    select(-sum_composition, -odd_chain, -modifs)
 }
 
 .check_col_specs <- function(data, cols) {
@@ -183,17 +204,56 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
   )
 }
 
+.join_sum_comp_nested <- function(df) {
+  df %>% hoist(ions, name=1, .remove = FALSE) %>%
+    select(file, name) %>% unnest(name) %>%
+    left_join(.get_sum_comp(.$name), by = c(name="names")) %>%
+    select(-name) %>% chop(-file)
+}
+
+.join_sum_comp <- function(df) {
+  df %>% left_join(.get_sum_comp(.[[1]]), by = setNames(c("names"), colnames(.)[[1]]))
+}
+
 .get_sum_comp <- function(names) {
   .en <- function(...) paste0("(", ..., ")")
   csep = "[/-_]"
   dbond_config = "\\((?:\\d{1,2}[ZE][,]*)+\\)"
   chain_notes = "\\((?:\\d{1,2}[^)]*)+\\)"
-  chain_p = paste0("[dth]?\\d{1,2}:\\d{1,2}",.en("?:", chain_notes), "*")
-  chain_multi_p = paste0(.en("?:", chain_p, csep, "*"), "+")
-  fas = sub("^.*\\(([^)]+)\\).*$", "\\1", names)
+  chain_p = paste0("([dthOP]?(?:methyl)?-?)(\\d{1,2}):(\\d{1,2})(",.en("?:", chain_notes), "*)")
+  chain_multi_p = paste0(.en("?:", chain_p, csep, "?"), "+")
+
+  names <- unique(names)
+  fas <- tibble(names = names, match=str_extract(names, chain_multi_p))
+  sum_comp <- fas %>% distinct(match) %>% filter(!is.na(match)) %>%
+    mutate(chains = str_match_all(match, chain_p)) %>%
+    group_by(match) %>%
+    mutate(
+      links = .collapse_char(chains[[1]][,2]),
+      total_cl = sum(as.numeric(chains[[1]][,3])),
+      total_cs = sum(as.numeric(chains[[1]][,4])),
+      modifs = .collapse_char(chains[[1]][,5]),
+      odd_chain = any(as.numeric(chains[[1]][,3]) %% 2 > 0)
+    ) %>%
+    ungroup() %>%
+    select(-chains) %>%
+    mutate(
+      links = sub(",+$", "", links), modifs = sub(",+$", "", modifs),
+      sum_composition = paste0(links, total_cl, ":", total_cs, modifs)
+    ) %>%
+    select(-links, -total_cl, -total_cs)
+
+  fas %>% left_join(sum_comp, by="match") %>%
+    mutate(sum_composition = stri_replace_first_fixed(names, match, sum_composition)) %>%
+    select(-match)
 }
 
+.collapse_char <- function(char) {
+  # char = char[char != ""]
+  paste(char, collapse = ",")
+}
 # colnames used internally
 utils::globalVariables(c(
-  "ions", "dda", "aif", "librules"
+  "ions", "dda", "aif", "librules", "match", "total_cl", "total_cs",
+  "chains", "sum_composition", "modifs", "links", "odd_chain"
 ))

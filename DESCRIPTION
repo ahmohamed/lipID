@@ -29,6 +29,8 @@ Imports:
     tidyr,
     plyr,
     readr,
+    stringi,
+    stringr,
     magrittr,
     shiny,
     shinydashboard,

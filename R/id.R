@@ -17,6 +17,11 @@
 #' Ignored if `features` is `NULL`.
 #' @param rt_window Retention time window for merging MS2 data with MS1
 #' features. Ignored if `features` is `NULL`.
+#' @param collapse Whether to collapse ambiguous molecules if they
+#' have the same sum composition. `TRUE` by default.
+#' @param odd_chain Whether to include molecules with odd chain fatty acids.
+#' @param chain_modifs Whether to include / exclude molecules with modified
+#' chain fatty acids.
 #' @param partial_match_cutoff Numeric value between 0-1. Allows molecules that
 #' satisfied some, but not all of the rules to be retained. Default is `1`,
 #' returning molecules with 100\% match. Set to `0` to include molecules
@@ -42,6 +47,7 @@
 #' head(annotated)
 lipID <- function(ms2_files, libs, features = NULL,
   ppm_tol=30, intensity_cutoff = 1000, mz_window=1, rt_window=2,
+  collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only", "none"),
   partial_match_cutoff=1) {
   ms2_data <- read_ms2(ms2_files)
   ms2_annotated <- match_ms2(ms2_data, libs, ppm_tol, intensity_cutoff) %>%

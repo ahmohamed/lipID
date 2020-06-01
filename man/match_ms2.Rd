@@ -4,7 +4,9 @@
 \alias{match_ms2}
 \title{Match lipid molecules from MS2 data}
 \usage{
-match_ms2(ms2, libs, ppm_tol = 30, intensity_cutoff = 1000)
+match_ms2(ms2, libs, ppm_tol = 30, intensity_cutoff = 1000,
+  collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only",
+  "none"))
 }
 \arguments{
 \item{ms2}{MS2 data frame. Should be the result of \code{read_ms2}.}
@@ -17,6 +19,15 @@ library. Default tolerance is 30 ppm.}
 
 \item{intensity_cutoff}{Minimum intensity value for fragments to be
 taken into account when matching. Default is 1000}
+
+\item{collapse}{Whether to collapse ambiguous molecules if they
+have the same sum composition. \code{TRUE} by default.}
+
+\item{odd_chain}{Whether to include molecules with odd chain fatty acids.}
+
+\item{chain_modifs}{Whether to include / exclude molecules with modified
+chain fatty acids.
+\code{FALSE} by default, since odd chains are unlikely in mammals.}
 }
 \value{
 A data frame with these columns:\itemize{

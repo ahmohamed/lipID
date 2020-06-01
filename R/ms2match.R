@@ -10,7 +10,12 @@
 #'  library. Default tolerance is 30 ppm.
 #' @param intensity_cutoff Minimum intensity value for fragments to be
 #'   taken into account when matching. Default is 1000
-#'
+#' @param collapse Whether to collapse ambiguous molecules if they
+#' have the same sum composition. `TRUE` by default.
+#' @param odd_chain Whether to include molecules with odd chain fatty acids.
+#' @param chain_modifs Whether to include / exclude molecules with modified
+#' chain fatty acids.
+#' `FALSE` by default, since odd chains are unlikely in mammals.
 #' @return A data frame with these columns:\itemize{
 #'     \item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
 #'     \item name   Name of the matching molecules
@@ -36,7 +41,8 @@
 #'
 #' # Get only the molecules that satisfied all the rules.
 #' confirmed_molecules %>% dplyr::filter(confirmed)
-match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000) {
+match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
+  collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only", "none")) {
   mz_tol_pos <- 1 + (ppm_tol/1e6)/2
   mz_tol_neg <- 1 - (ppm_tol/1e6)/2
   # get subset of matched ms1 features that has ms2 data available
@@ -47,15 +53,16 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000) {
     match_ms1(libs) %>% filter(!is.na(name))
 
   if (nrow(ms1_matched) == 0) {
+    stop("MS2 precursors did not match any molecules in the library")
     return(NULL)
   }
-  ms1_matched = ms1_matched %>%
+  ms1_matched <- ms1_matched %>%
     group_by(file) %>%
     do({
       rules <- libs[libs$file == .$file[[1]],]
       left_join(.,
         rules$ions[[1]] %>% rename(name=1) %>%
-          tidyr::gather("lib_ion", "lib_mz", -1) %>%
+          tidyr::gather("lib_ion", "lib_mz", -1, -sum_composition, -odd_chain, -modifs) %>%
           mutate(
             and_cols=lib_ion %in% unlist(rules$and_cols),
             or_cols=lib_ion %in% unlist(rules$or_cols),
@@ -66,6 +73,23 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000) {
       )
     }) %>% distinct() %>% rename(precursor = mz) %>%
     left_join(ms2 %>% distinct(ms2_file, precursor, ms2_rt)) # Add ms2 file info
+
+  if (!odd_chain) {
+    ms1_matched <- filter(ms1_matched, !odd_chain | is.na(odd_chain))
+  }
+
+  chain_modifs <- match.arg(chain_modifs)
+  if (chain_modifs != "all") {
+    if (chain_modifs == "only") {
+      ms1_matched <- filter(ms1_matched, modifs != "")
+    } else {
+      ms1_matched <- filter(ms1_matched, modifs == "" | is.na(modifs))
+    }
+  }
+  if (nrow(ms1_matched) == 0) {
+    stop("MS2 precursors did not match any molecules in the library.",
+      "Try using a different library configuration.")
+  }
 
   ms2_ <- ms2
   setDT(ms2_)
@@ -81,21 +105,38 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000) {
     allow.cartesian=TRUE, nomatch=NA, mult="first"
     ] %>% as.data.frame()
 
-  ret %>% group_by(ms2_file, precursor, ms2_rt, name) %>%
+  if (nrow(ret) == 0) {
+    stop("No matches found for MS2 data.",
+      "Try using a different library configuration.")
+  }
+
+  ret <- ret %>% group_by(ms2_file, precursor, ms2_rt, name) %>%
     summarise(
       n_and = dplyr::first(n_and), n_or = dplyr::first(n_or),
       n_and_true = sum(!is.na(ms2_intensity[and_cols])),
       n_or_true = sum(!is.na(ms2_intensity[or_cols])),
-      ions_matched = paste(lib_ion[!is.na(ms2_intensity) & (and_cols | or_cols)], collapse = ";")
+      ions_matched = paste(lib_ion[!is.na(ms2_intensity)], collapse = ";"), # all ions matched, including non-ruled
+      fragments_intensity = sum(ms2_intensity, na.rm = TRUE), # all ions matched, including non-ruled
+      sum_composition = first(sum_composition),
+      odd_chain = first(odd_chain),
+      modifs = first(modifs)
     ) %>%
     mutate(
-      and_cols = n_and == n_and_true, #all(!and_cols) | all(! is.na(ms2_intensity[and_cols]) ),
-      or_cols = n_or == 0 | n_or_true > 0,#all(!or_cols) | any(! is.na(ms2_intensity[or_cols]) ),
+      and_cols = n_and == n_and_true,
+      or_cols = n_or == 0 | n_or_true > 0,
       or_rule = ifelse((n_or > 0) & (n_or_true > 0), 1, 0),
       partial_match = (n_and_true + or_rule) / (n_and + (n_or > 0)),
       confirmed = and_cols & or_cols
     ) %>%
-    select(everything(), -or_rule, -ions_matched, ions_matched)
+    select(
+      ms2_file, precursor, ms2_rt, name, confirmed, ions_matched, fragments_intensity,
+      partial_match, everything(), -or_rule)
+
+  if (collapse) {
+    return(.collapse_sum_composition(ret))
+  }
+
+  return(ret)
 }
 
 
@@ -149,15 +190,87 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2) {
 
   colnames(ret)[1:2] = colnames(features)[1:2]
   features %>% left_join(ret) %>% left_join(ms2_data) %>%
-    select(1,2, name, ms2_file, precursor, ms2_rt, partial_match, confirmed, ions_matched, everything())
+    select(1,2, name, ms2_file, precursor, ms2_rt, partial_match, confirmed, ions_matched, fragments_intensity, everything()) %>%
+    distinct() %>%
+    group_by(1,2) %>%
+    arrange(-partial_match, -fragments_intensity)
 }
 
+.collapse_sum_composition <- function(df){
+  dups <- df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition) %>%
+    filter(confirmed, dplyr::n() >1, !is.na(sum_composition))
+
+  if (nrow(dups) == 0) {
+    return (df)
+  }
+
+  summed <- dups %>%
+    mutate(
+      name = first(sum_composition),
+      ions_matched = paste(
+        unique(unlist(strsplit(ions_matched, ";"))),
+        collapse = ";"),
+      fragments_intensity = max(fragments_intensity, na.rm = TRUE),
+      odd_chain = all(odd_chain)
+    ) %>%
+    summarise_all(first)
+
+  df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition) %>%
+    filter(!confirmed | dplyr::n() < 2 | is.na(sum_composition)) %>%
+    ungroup() %>%
+    bind_rows(summed)
+}
 # colnames used internally
 utils::globalVariables(c(
   ".",
   "ms2_file", "s_idx", "precursor", "ms2_rt", "ms2_mz", "ms2_intensity",
   "mz", "rt", "name", "precursor", "mz_max", "mz_min", "rt_max", "rt_min",
-  "lib_mz", "lib_ion", "ions_matched",
+  "lib_mz", "lib_ion", "ions_matched", "fragments_intensity", "confirmed",
   "n_and", "n_and_true", "n_or", "n_or_true", "and_cols", "or_cols", "or_rule"
 ))
 
+
+# .unnest_libs <- function(ions, odd_chain) {
+#   ions_long <- pivot_longer(
+#     rename(ions, name=1),
+#     c(-1, -sum_composition, -odd_chain),
+#     names_to = "lib_ion", values_to = "lib_mz")
+#
+#   if(!odd_chain)
+#     ions_long <- filter(!odd_chain)
+#
+#   ions_long %>% mutate(
+#     and_cols=lib_ion %in% unlist(rules$and_cols),
+#     or_cols=lib_ion %in% unlist(rules$or_cols),
+#     n_and = length(unlist(rules$and_cols)),
+#     n_or = length(unlist(rules$or_cols))
+#   )
+#
+#   libs %>% rowwise() %>%
+#     do({
+#       pivot_longer(
+#         rename(.$ions, name=1),
+#         c(-1, -sum_composition, -odd_chain),
+#         names_to = "lib_ion", values_to = "lib_mz") %>%
+#         mutate(
+#           and_cols=lib_ion %in% unlist(.$and_cols),
+#           or_cols=lib_ion %in% unlist(.$or_cols),
+#           n_and = length(unlist(.$and_cols)),
+#           n_or = length(unlist(.$or_cols))
+#         )
+#     })
+#
+#   libs %>% group_by(file) %>%
+#     group_modify(
+#       ~ pivot_longer(
+#         rename(.x$ions[[1]], name=1),
+#         c(-1, -sum_composition, -odd_chain),
+#         names_to = "lib_ion", values_to = "lib_mz") %>%
+#         mutate(
+#           and_cols=lib_ion %in% unlist(.x$and_cols),
+#           or_cols=lib_ion %in% unlist(.x$or_cols),
+#           n_and = length(unlist(.x$and_cols)),
+#           n_or = length(unlist(.x$or_cols))
+#         )
+#     )
+# }

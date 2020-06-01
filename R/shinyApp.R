@@ -98,35 +98,50 @@ get_ui <- function(init_libs) {
       ),
       dashboardSidebar(disable = TRUE),
       dashboardBody(fluidRow(
-        box(status = "primary", width = 4,
-          fileInput('ms2_file', "Upload MS2 files", multiple = TRUE,
-            accept = c(".ms2")
+        box(width = 4,
+          tabBox(width = NULL, id = "input_tabs",
+            tabPanel("MS2 data",
+              fileInput('ms2_file', "Upload MS2 files", multiple = TRUE,
+                accept = c(".ms2")
+              ),
+              numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
+              numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
+              sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%")
+            ),
+            tabPanel("Library",
+              radioGroupButtons(inputId = "libmode", label = "Polarity",
+                choices = c("Pos", "Neg"), checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+              ),
+              pickerInput("liblist", "Lipid Classes",
+                choices = init_libs$file, multiple = TRUE, selected = init_libs$file,
+                options = list(`actions-box` = TRUE)),
+              awesomeCheckbox(inputId = "sum_comp",
+                label = HTML("Collapse ambiguous compounds <br/>to their sum composition"),
+                value = TRUE
+              ),
+              awesomeCheckbox(inputId = "odd_chain",
+                label = "Include lipids with odd-chain lengths",
+                value = FALSE
+              ),
+              radioGroupButtons(inputId = "modifs", label = "Chain modifications",
+                choices = c("All"="all", "Non-modified"="none", "Modified"="only"),
+                checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+              )
+            ),
+            tabPanel("Features",
+              fileInput('features_file', "Upload features table",
+                accept = c("txt/csv", "text/comma-separated-values,text/plain", ".csv")
+              ),
+              sliderInput(
+                'mz_window',
+                'Quadrupole isolation window (Daltons)',
+                0, 10, 1, 0.01, post=" Da"),
+              sliderInput('rt_window',
+                'RT window (minutes) for merging MS2 annotations with feature table',
+                0, 10, 1, 0.1, post=" min")
+            )
           ),
-          numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
-          numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
-          sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%"),
 
-          radioGroupButtons(
-            inputId = "libmode",
-            label = "Polarity",
-            choices = c("Pos", "Neg"),
-            checkIcon = list(yes = icon("ok", lib = "glyphicon"))
-          ),
-          pickerInput("liblist", "Lipid Classes",
-            choices = init_libs$file, multiple = TRUE, selected = init_libs$file,
-            options = list(`actions-box` = TRUE)),
-          uiOutput('match_ms2_opts'),
-
-          fileInput('features_file', "Upload features table",
-            accept = c("txt/csv", "text/comma-separated-values,text/plain", ".csv")
-          ),
-          sliderInput(
-            'mz_window',
-            'Quadrupole isolation window (Daltons)',
-            0, 10, 1, 0.01, post=" Da"),
-          sliderInput('rt_window',
-            'RT window (minutes) for merging MS2 annotations with feature table',
-            0, 10, 1, 0.1, post=" min"),
           gobttn('go', 'GIMME IDs!')
         ), #end box side
         box(status = "danger", width = 8,
@@ -169,24 +184,8 @@ server <- function(input, output, session) {
 
     withLoading(session, "go", {
       output$result <- renderUI(DTOutput('tbl'))
-
-      showNotification("Reading MS2 files", duration = 20)
-      ms2_files <- setNames(input$ms2_file$datapath, input$ms2_file$name)
-      print("ms2_files")
-      print(ms2_files)
-      ms2_data <- quietly(read_ms2)(ms2_files)
-
-      showNotification("Matching against lipid libraries", duration = 30)
-      selected_libs <- libs %>% filter(file %in% input$liblist)
-      ms2_annotated <- match_ms2(ms2_data, selected_libs, input$ppm_tol, input$intensity_cutoff) %>%
-        filter(partial_match >= (input$partial_match_cutoff/100))
-
-      if(!is.null(input$features_file)){
-        showNotification("Merging MS2 annotations with feature table", duration = 10)
-        tbl <- merge_ms2(features, ms2_annotated, input$mz_window, input$rt_window)
-      } else {
-        tbl <- ms2_annotated
-      }
+      tbl <- quietly(.match_in_app)(input, libs, features)
+      req(tbl)
 
       showNotification("Rendering results", duration = 10)
       output$tbl <- renderDT({
@@ -211,6 +210,32 @@ server <- function(input, output, session) {
   })
 }
 
+
+.match_in_app <- function(input, libs, features) {
+  showNotification("Reading MS2 files", duration = 20)
+  ms2_files <- setNames(input$ms2_file$datapath, input$ms2_file$name)
+  print("ms2_files")
+  print(ms2_files)
+  ms2_data <- read_ms2(ms2_files)
+
+  showNotification("Matching against lipid libraries", duration = 30)
+  selected_libs <- libs %>% filter(file %in% input$liblist)
+  ms2_annotated <- match_ms2(
+    ms2_data, selected_libs,
+    ppm_tol = input$ppm_tol, intensity_cutoff = input$intensity_cutoff,
+    collapse = input$sum_comp, odd_chain = input$odd_chain, chain_modifs = input$modifs
+  ) %>%
+    filter(partial_match >= (input$partial_match_cutoff/100))
+
+  if(!is.null(input$features_file)){
+    showNotification("Merging MS2 annotations with feature table", duration = 10)
+    tbl <- merge_ms2(features, ms2_annotated, input$mz_window, input$rt_window)
+  } else {
+    tbl <- ms2_annotated
+  }
+  tbl
+}
+
 .launchApp <- function(){
   shinyApp(ui = get_ui(), server = server)
 }
@@ -219,15 +244,15 @@ server <- function(input, output, session) {
 #'
 #' @return None
 #' @import shiny
-#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar dashboardBody box
+#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar dashboardBody box tabBox
 #' @importFrom shinyjs useShinyjs hidden
 #' @importFrom shinyalert useShinyalert shinyalert
-#' @importFrom shinyWidgets actionBttn radioGroupButtons pickerInput updatePickerInput
+#' @importFrom shinyWidgets actionBttn radioGroupButtons pickerInput updatePickerInput awesomeCheckbox
 #' @importFrom DT datatable formatSignif renderDT DTOutput
 #' @export
 lipIDApp <- function(){
   appDir <- system.file("shinyApp", package = "lipID")
-  runApp(appDir = appDir)
+  runApp(appDir = appDir, launch.browser = TRUE)
 }
 
 

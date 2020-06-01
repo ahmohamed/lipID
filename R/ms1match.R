@@ -48,9 +48,9 @@ match_ms1 <- function(features, libs, mz_tol = 0.025) {
 #' precs = get_precursors(libs)
 #' head(precs)
 get_precursors <- function(libs) {
-  plyr::ldply(setNames(libs$ions, libs$file),
-    function(x) x %>% select(name=1, prec_mz=2), .id = "file"
-  )
+  libs %>% select(file, ions) %>%
+    hoist(ions, name=1, prec_mz=2) %>%
+    select(-ions) %>% unnest(-file)
 }
 
 .check_features_df <- function(f) {

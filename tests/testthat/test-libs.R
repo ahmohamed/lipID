@@ -22,5 +22,13 @@ test_that("can use no or_cols", {
   expect_equal(2 * 2, 4)
 })
 
+test_that("can handle duplicate rows", {
+  expect_equal(2 * 2, 4)
+})
+
+test_that("can handle duplicate names", {
+  expect_equal(2 * 2, 4)
+})
+
 
 

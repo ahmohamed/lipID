@@ -6,7 +6,8 @@
 \usage{
 lipID(ms2_files, libs, features = NULL, ppm_tol = 30,
   intensity_cutoff = 1000, mz_window = 1, rt_window = 2,
-  partial_match_cutoff = 1)
+  collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only",
+  "none"), partial_match_cutoff = 1)
 }
 \arguments{
 \item{ms2_files}{a character vector of file names or directory
@@ -29,6 +30,14 @@ Ignored if \code{features} is \code{NULL}.}
 
 \item{rt_window}{Retention time window for merging MS2 data with MS1
 features. Ignored if \code{features} is \code{NULL}.}
+
+\item{collapse}{Whether to collapse ambiguous molecules if they
+have the same sum composition. \code{TRUE} by default.}
+
+\item{odd_chain}{Whether to include molecules with odd chain fatty acids.}
+
+\item{chain_modifs}{Whether to include / exclude molecules with modified
+chain fatty acids.}
 
 \item{partial_match_cutoff}{Numeric value between 0-1. Allows molecules that
 satisfied some, but not all of the rules to be retained. Default is \code{1},
