@@ -28,9 +28,15 @@ rewritten to improve the performance (100x speed), and make it compatible
 with the latest R releases and tidyverse workflows.`lipID` also allows
 users to add custom libraries to search against.
 
+#Usage
+
+## [Web App (Shiny)](https://ahmohamed.shinyapps.io/lipID/)
+
+Annotate lipidomics datasets interactively. Zero R skills required!
+
 ## Installation
 
-You can install lipID from [GitHub](https://github.com/lipID) with:
+You can install lipID from [GitHub](https://github.com/ahmohamed/lipID) with:
 
 ``` r
 # install.packages("devtools")
@@ -41,7 +47,7 @@ devtools::install_github("ahmohamed/lipID")
 Files containing MS2 spectra should be converted to `ms2` format. You can use MSConvert to do so.
 
 ### Features table (optional)
-A CSV file with MS1 features, intensities for each sample. First and second column should have MZ and RT values. ([see example here](inst/extdata/features.csv))
+A CSV file with MS1 features, intensities for each sample. First and second column should have MZ and RT values. ([see example here](https://github.com/ahmohamed/lipID/tree/master/inst/extdata))
 
 <img src="man/figures/feature_table.png" width="600">
 
@@ -74,3 +80,19 @@ libs <- get_libs(mode = 'Pos', acq = 'dda')
 annotated <- lipID(ms2_file, libs, features_file)
 head(annotated)
 ```
+
+You can then interactively plot the results:
+
+```{r plot, eval=FALSE}
+plot_features(annotated, color_by = "class_name")
+```
+
+<img src="man/figures/plot_features.gif" width="400">
+
+# Development
+
+This package is under development. We are seeking feedback from the community for suggestions or improvements. If you have any comments, open an issue or contact me!
+
+### Ion mobility lipidomics
+
+We are looking for untargeted lipidomics datasets with ion mobility data. If you have / know of any useful dataset, let us know!
