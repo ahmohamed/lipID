@@ -1,0 +1,5 @@
+ms2_file <- system.file("extdata", "ms2file.ms2", package = "lipID")
+features_file <- system.file("extdata", "features.csv", package = "lipID")
+libs <- get_libs()
+annotated_features <- lipID(ms2_file, libs, features_file, partial_match_cutoff = 0)
+usethis::use_data(annotated_features, overwrite = TRUE)

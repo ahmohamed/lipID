@@ -27,7 +27,7 @@ match_ms1 <- function(features, libs, mz_tol = 0.025) {
     precursors,
     on=.(mz_min<=prec_mz, mz_max>=prec_mz),
     allow.cartesian=TRUE, nomatch=0,
-    .(mz, rt, file, name, prec_mz)
+    .(mz, rt, file, class_name, name, prec_mz)
   ] %>% as.data.frame() %>% distinct()
 
   colnames(ret)[1:2] = colnames(features)[1:2]
@@ -48,7 +48,7 @@ match_ms1 <- function(features, libs, mz_tol = 0.025) {
 #' precs = get_precursors(libs)
 #' head(precs)
 get_precursors <- function(libs) {
-  libs %>% select(file, ions) %>%
+  libs %>% select(file, class_name, ions) %>%
     hoist(ions, name=1, prec_mz=2) %>%
     select(-ions) %>% unnest(-file)
 }

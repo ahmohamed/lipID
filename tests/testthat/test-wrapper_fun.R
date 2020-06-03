@@ -8,3 +8,7 @@ test_that("can work without features as input", {
 test_that("can work without features as input", {
   lipID(ms2_file, libs, features_file)
 })
+
+test_that("can work with column names other that mz/rt", {
+  lipID(ms2_file, libs, features_file)
+})

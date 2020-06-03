@@ -1,8 +1,9 @@
-#' @importFrom dplyr select filter select mutate rename left_join
-#' @importFrom dplyr do distinct rowwise group_by ungroup bind_rows bind_cols
-#' @importFrom dplyr arrange summarise_all summarise everything
+#' @importFrom dplyr select filter select mutate rename left_join row_number
+#' @importFrom dplyr do distinct rowwise group_by ungroup group_by_at vars
+#' @importFrom dplyr bind_rows bind_cols arrange summarise_all summarise everything
 #' @importFrom tibble tibble enframe
-#' @importFrom stats median setNames
+#' @importFrom stats median setNames na.omit
+#' @importFrom grDevices colorRampPalette
 NULL
 
 
@@ -50,6 +51,16 @@ NULL
 #' data("librules")
 "librules"
 
+#' Example output data with annonated features
+#'
+#' @docType data
+#' @name annotated_features
+#' @usage data("annotated_features")
+#' @seealso lipID
+#' @examples
+#' data("annotated_features")
+"annotated_features"
 
+utils::globalVariables(c("annotated_features"))
 # TODO: Targetted feature extraction: filter ms2 data by MZ, RT then run ms2_match
 # TODO: mege_ms2 add param method=c("nearest", "nearest_confirmed", "all")

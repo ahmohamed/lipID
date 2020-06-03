@@ -53,8 +53,8 @@ quietly <- function(.f) {
   }
 }
 how_to_use <- function() {
-
   tagList(
+    actionBttn('exmaple', "Load Example Results", style="material-flat", color="danger"),
     tags$h1('How to use:'),
     tags$h3('1. Prepare you MS2 files:'),
     tags$p('Use MSConvert to format your raw MS2 data as *.ms2 files. ',
@@ -80,7 +80,8 @@ get_ui <- function(init_libs) {
       tags$style(
         ".datatables.html-widget{overflow-x:auto;}",
         ".pg-loading-screen {background-color: #17a2b8 !important;}",
-        "#ftable {max-width: 500px; width: 100%; height: auto}"
+        "#ftable {max-width: 500px; width: 100%; height: auto}",
+        ".dwnld {display:inline}"
       ),
       tags$head(tags$title("lipID: Fast lipid ID from MS/MS spectra"))
     )),
@@ -153,6 +154,7 @@ get_ui <- function(init_libs) {
 }
 
 server <- function(input, output, session) {
+  results <- reactiveVal()
   output$result <- renderUI({
     how_to_use()
   })
@@ -167,7 +169,6 @@ server <- function(input, output, session) {
 
   observeEvent(input$go, {
     req(input$go > 0)
-    print("go")
     if(is.null(input$ms2_file)){
       shinyalert(text="No input MS2 files", type="error")
       return()
@@ -183,33 +184,21 @@ server <- function(input, output, session) {
     }
 
     withLoading(session, "go", {
-      output$result <- renderUI(DTOutput('tbl'))
       tbl <- quietly(.match_in_app)(input, libs, features)
-      req(tbl)
-
-      showNotification("Rendering results", duration = 10)
-      output$tbl <- renderDT({
-        req(tbl)
-        tbl %>% select(-n_and, -n_or, -n_and_true, -n_or_true, -and_cols, -or_cols) %>%
-          datatable(extensions = 'Buttons', rownames = FALSE,
-            options = list(
-              dom = 'Bfrtip',
-              buttons=list('copy', list(
-                extend = 'collection',
-                buttons = list(
-                  list(extend = 'csv', filename = 'lipID_annotated'),
-                  list(extend = 'excel', filename = 'lipID_annotated', title = "Exported from lipID"),
-                  list(extend = 'pdf', filename = 'lipID_annotated', title = "Exported from lipID")
-                ),
-                text = 'Download'
-              ))
-          )) %>%
-          formatSignif(sapply(., is.numeric), digits = 3)
-      }, server = FALSE)
+      results(req(tbl))
     })
   })
-}
 
+  observe({
+    req(results())
+    .render_results(input, output, results())
+  })
+
+  observeEvent(input$exmaple, {
+    req(input$exmaple > 0)
+    results(as.data.frame(annotated_features))
+  })
+}
 
 .match_in_app <- function(input, libs, features) {
   showNotification("Reading MS2 files", duration = 20)
@@ -245,10 +234,10 @@ server <- function(input, output, session) {
 #' @return None
 #' @import shiny
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar dashboardBody box tabBox
-#' @importFrom shinyjs useShinyjs hidden
+#' @importFrom shinyjs useShinyjs hidden disabled
 #' @importFrom shinyalert useShinyalert shinyalert
 #' @importFrom shinyWidgets actionBttn radioGroupButtons pickerInput updatePickerInput awesomeCheckbox
-#' @importFrom DT datatable formatSignif renderDT DTOutput
+#' @importFrom DT datatable formatSignif renderDT DTOutput dataTableProxy replaceData selectRows JS
 #' @export
 lipIDApp <- function(){
   appDir <- system.file("shinyApp", package = "lipID")

@@ -110,7 +110,7 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
       "Try using a different library configuration.")
   }
 
-  ret <- ret %>% group_by(ms2_file, precursor, ms2_rt, name) %>%
+  ret <- ret %>% group_by(ms2_file, precursor, ms2_rt, file, class_name, name) %>%
     summarise(
       n_and = dplyr::first(n_and), n_or = dplyr::first(n_or),
       n_and_true = sum(!is.na(ms2_intensity[and_cols])),
@@ -147,6 +147,8 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
 #' @param ms2_data MS2 data frame. Should be the result of `read_ms2`.
 #' @param mz_window Quadropole isolation window (Daltons).
 #' @param rt_window Retention time window.
+#' @param output Whether to return all possible matches for each feature `all`,
+#' or only the best match `best_match`.
 #'
 #' @return A merged data frame containing both MS1 features with their
 #' corresponding MS2 data.
@@ -163,14 +165,15 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
 #' confirmed_molecules <- match_ms2(ms2_data, libs)
 #' annotated_features <- merge_ms2(features, confirmed_molecules)
 #' head(annotated_features)
-merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2) {
+merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2, output = c("all", "best_match")) {
   # mz error between feature mz and ms2 precursor
-  mz_tol <- mz_window / 2
+  # mz_tol <- mz_window / 2
+  mz_tol <- 0.025
   rt_tol <- rt_window / 2
 
   f_copy <- .check_features_df(features)
   ms2_copy <- ms2_data[, c("precursor", "ms2_rt")]
-  #  colnames(ms2_copy) <- paste("ms2", colnames(ms2), sep="_")
+
   setDT(f_copy)
   setDT(ms2_copy)
   f_copy <- f_copy[, ":="(
@@ -188,12 +191,26 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2) {
     .(mz, rt, precursor, ms2_rt)
     ] %>% as.data.frame()
 
+  if (nrow(ret) == 0) {
+    stop("Could not align MS2 precursors with features table.",
+      "Are they from the same run?")
+  }
+  ret <- ret %>% distinct() %>% group_by(mz, rt) %>%
+    arrange(-abs(rt - ms2_rt)) %>%
+    mutate(nearest_ms2 = row_number() == 1)
+
   colnames(ret)[1:2] = colnames(features)[1:2]
-  features %>% left_join(ret) %>% left_join(ms2_data) %>%
-    select(1,2, name, ms2_file, precursor, ms2_rt, partial_match, confirmed, ions_matched, fragments_intensity, everything()) %>%
+  merged <- features %>% left_join(ret) %>% left_join(ms2_data) %>%
     distinct() %>%
-    group_by(1,2) %>%
-    arrange(-partial_match, -fragments_intensity)
+    group_by_at(vars(1,2)) %>%
+    arrange(-nearest_ms2, -partial_match, -fragments_intensity) %>%
+    mutate(best_match = row_number() == 1) %>%
+    select(1,2, name, ms2_file, precursor, ms2_rt, best_match, partial_match, confirmed, ions_matched, fragments_intensity, everything())
+
+  if (match.arg(output) == 'best_match') {
+    return(merged %>% filter(best_match))
+  }
+  merged
 }
 
 .collapse_sum_composition <- function(df){
@@ -226,7 +243,8 @@ utils::globalVariables(c(
   "ms2_file", "s_idx", "precursor", "ms2_rt", "ms2_mz", "ms2_intensity",
   "mz", "rt", "name", "precursor", "mz_max", "mz_min", "rt_max", "rt_min",
   "lib_mz", "lib_ion", "ions_matched", "fragments_intensity", "confirmed",
-  "n_and", "n_and_true", "n_or", "n_or_true", "and_cols", "or_cols", "or_rule"
+  "n_and", "n_and_true", "n_or", "n_or_true", "and_cols", "or_cols", "or_rule",
+  "best_match", "class_name", "nearest_ms2"
 ))
 
 

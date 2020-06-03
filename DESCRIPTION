@@ -1,6 +1,6 @@
 Package: lipID
 Title: Fast Lipid Identification from MS MS spectra
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person(
         "Ahmed", "Mohamed", 
@@ -21,6 +21,7 @@ Depends:
     R (>= 3.6.0)
 Imports:
     methods,
+    grDevices,
     stats,
     utils,
     data.table,
@@ -31,6 +32,8 @@ Imports:
     readr,
     stringi,
     stringr,
+    plotly,
+    RColorBrewer,
     magrittr,
     shiny,
     shinydashboard,

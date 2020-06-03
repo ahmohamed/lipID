@@ -4,7 +4,8 @@
 \alias{merge_ms2}
 \title{Merge MS2 data with MS1 features}
 \usage{
-merge_ms2(features, ms2_data, mz_window = 1, rt_window = 2)
+merge_ms2(features, ms2_data, mz_window = 1, rt_window = 2,
+  output = c("all", "best_match"))
 }
 \arguments{
 \item{features}{two column dataframe, m/z and RT}
@@ -14,6 +15,9 @@ merge_ms2(features, ms2_data, mz_window = 1, rt_window = 2)
 \item{mz_window}{Quadropole isolation window (Daltons).}
 
 \item{rt_window}{Retention time window.}
+
+\item{output}{Whether to return all possible matches for each feature \code{all},
+or only the best match \code{best_match}.}
 }
 \value{
 A merged data frame containing both MS1 features with their

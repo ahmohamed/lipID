@@ -24,7 +24,7 @@ read_ms2 <- function(files) {
   plyr::ldply(files, read_ms2_file, .id = "ms2_file")
 }
 
-#' @importFrom readr read_lines read_csv
+#' @importFrom readr read_lines read_csv write_csv
 #' @importFrom tidyr separate
 read_ms2_file <- function(file) {
   ms2 <- readr::read_lines(file)
