@@ -105,6 +105,8 @@ add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
     .join_sum_comp()
   first_col_name <- colnames(lib_data)[[1]]
   fragment_cols <- colnames(lib_data)[-1]
+  classkmd <- mean(lib_data$classkmd, na.rm = TRUE)
+  lib_data <- select(lib_data, -classkmd)
 
   if (length(or_cols) == 1 && and_cols == 'all') {
     and_cols = fragment_cols
@@ -133,7 +135,7 @@ add_lib <- function(file, class_name=NULL, and_cols = 'all', or_cols = 'rest',
     and_cols = list(and_cols),
     or_cols = list(or_cols),
     dda, aif, class_only = FALSE,
-    mode, adduct, class_name,
+    mode, adduct, class_name, classkmd,
     ions = list(lib_data),
     user_defined = TRUE
   )
@@ -191,8 +193,9 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
   librules %>%
     left_join(.join_sum_comp_nested(.), by = "file") %>%
     mutate(ions = mapply(bind_cols,
-      ions, sum_composition = sum_composition, odd_chain = odd_chain, modifs = modifs)) %>%
-    select(-sum_composition, -odd_chain, -modifs)
+      ions, sum_composition = sum_composition, odd_chain = odd_chain, modifs = modifs,
+      total_cl=total_cl, total_cs=total_cs)) %>%
+    select(-sum_composition, -odd_chain, -modifs, -total_cl, -total_cs)
 }
 
 .check_col_specs <- function(data, cols) {
@@ -205,14 +208,22 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
 }
 
 .join_sum_comp_nested <- function(df) {
-  df %>% hoist(ions, name=1, .remove = FALSE) %>%
-    select(file, name) %>% unnest(name) %>%
+  df %>% hoist(ions, name=1, mz=2, .remove = FALSE) %>%
+    select(file, name, mz) %>% unnest(c(name, mz)) %>%
     left_join(.get_sum_comp(.$name), by = c(name="names")) %>%
-    select(-name) %>% chop(-file)
+    .add_kmd() %>%
+    select(-name, -mz, -KMD) %>% chop(-file) %>%
+    rowwise() %>%
+    mutate(classkmd = mean(classkmd, na.rm = TRUE)) %>%
+    ungroup()
 }
 
 .join_sum_comp <- function(df) {
-  df %>% left_join(.get_sum_comp(.[[1]]), by = setNames(c("names"), colnames(.)[[1]]))
+  sum_comp <- df %>% select(name=1, mz=2) %>%
+    left_join(.get_sum_comp(.$name), by = c(name="names")) %>%
+    .add_kmd() %>%
+    select(-mz, -KMD)
+  df %>% left_join(sum_comp, by = setNames(c("name"), colnames(.)[[1]]))
 }
 
 .get_sum_comp <- function(names) {
@@ -241,11 +252,18 @@ get_libs <- function(mode = c("Pos", "Neg"), acq = c("dda", "aif")) {
       links = sub(",+$", "", links), modifs = sub(",+$", "", modifs),
       sum_composition = paste0(links, total_cl, ":", total_cs, modifs)
     ) %>%
-    select(-links, -total_cl, -total_cs)
+    select(-links)
 
   fas %>% left_join(sum_comp, by="match") %>%
     mutate(sum_composition = stri_replace_first_fixed(names, match, sum_composition)) %>%
     select(-match)
+}
+
+.add_kmd <- function(df) {
+  df %>% mutate(
+    KMD = (mz * (14 / 14.01565)) %% 1, # Modulo operator gets the defect!
+    classkmd = KMD + (total_cs * 0.013399)
+  )
 }
 
 .collapse_char <- function(char) {
