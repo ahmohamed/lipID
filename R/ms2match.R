@@ -133,10 +133,11 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
       partial_match, everything(), -or_rule)
 
   if (collapse) {
-    return(.collapse_sum_composition(ret))
+    ret <- .collapse_sum_composition(ret)
   }
 
-  return(ret)
+  ret %>% arrange(-partial_match, -fragments_intensity) %>%
+    mutate(best_match = row_number() == 1)
 }
 
 
