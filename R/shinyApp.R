@@ -72,8 +72,62 @@ how_to_use <- function() {
   )
 }
 
-get_ui <- function(init_libs) {
+input_controls_ui <- function() {
   init_libs <- get_libs()
+  tagList(
+    box(width = 4,
+      tabBox(width = NULL, id = "input_tabs",
+        tabPanel("MS2 data",
+          fileInput('ms2_file', "Upload MS2 files", multiple = TRUE,
+            accept = c(".ms2")
+          ),
+          numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
+          numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
+          sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%")
+        ),
+        tabPanel("Library",
+          radioGroupButtons(inputId = "libmode", label = "Polarity",
+            choices = c("Pos", "Neg"), checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+          ),
+          pickerInput("liblist", "Lipid Classes",
+            choices = init_libs$file, multiple = TRUE, selected = init_libs$file,
+            options = list(`actions-box` = TRUE)),
+          awesomeCheckbox(inputId = "sum_comp",
+            label = HTML("Collapse ambiguous compounds <br/>to their sum composition"),
+            value = TRUE
+          ),
+          awesomeCheckbox(inputId = "odd_chain",
+            label = "Include lipids with odd-chain lengths",
+            value = FALSE
+          ),
+          radioGroupButtons(inputId = "modifs", label = "Chain modifications",
+            choices = c("All"="all", "Non-modified"="none", "Modified"="only"),
+            checkIcon = list(yes = icon("ok", lib = "glyphicon"))
+          )
+        ),
+        tabPanel("Features",
+          fileInput('features_file', "Upload features table",
+            accept = c("txt/csv", "text/comma-separated-values,text/plain", ".csv")
+          ),
+          sliderInput(
+            'mz_window',
+            'Quadrupole isolation window (Daltons)',
+            0, 10, 1, 0.01, post=" Da"),
+          sliderInput('rt_window',
+            'RT window (minutes) for merging MS2 annotations with feature table',
+            0, 10, 1, 0.1, post=" min")
+        )
+      ),
+
+      gobttn('go', 'GIMME IDs!')
+    ), #end box side
+    box(status = "danger", width = 8,
+      how_to_use()
+    )
+  )
+}
+
+get_ui <- function() {
   ui <- tagList(
     useShinyjs(), useShinyalert(),
     singleton(tags$head(
@@ -99,55 +153,7 @@ get_ui <- function(init_libs) {
       ),
       dashboardSidebar(disable = TRUE),
       dashboardBody(fluidRow(
-        box(width = 4,
-          tabBox(width = NULL, id = "input_tabs",
-            tabPanel("MS2 data",
-              fileInput('ms2_file', "Upload MS2 files", multiple = TRUE,
-                accept = c(".ms2")
-              ),
-              numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
-              numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
-              sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%")
-            ),
-            tabPanel("Library",
-              radioGroupButtons(inputId = "libmode", label = "Polarity",
-                choices = c("Pos", "Neg"), checkIcon = list(yes = icon("ok", lib = "glyphicon"))
-              ),
-              pickerInput("liblist", "Lipid Classes",
-                choices = init_libs$file, multiple = TRUE, selected = init_libs$file,
-                options = list(`actions-box` = TRUE)),
-              awesomeCheckbox(inputId = "sum_comp",
-                label = HTML("Collapse ambiguous compounds <br/>to their sum composition"),
-                value = TRUE
-              ),
-              awesomeCheckbox(inputId = "odd_chain",
-                label = "Include lipids with odd-chain lengths",
-                value = FALSE
-              ),
-              radioGroupButtons(inputId = "modifs", label = "Chain modifications",
-                choices = c("All"="all", "Non-modified"="none", "Modified"="only"),
-                checkIcon = list(yes = icon("ok", lib = "glyphicon"))
-              )
-            ),
-            tabPanel("Features",
-              fileInput('features_file', "Upload features table",
-                accept = c("txt/csv", "text/comma-separated-values,text/plain", ".csv")
-              ),
-              sliderInput(
-                'mz_window',
-                'Quadrupole isolation window (Daltons)',
-                0, 10, 1, 0.01, post=" Da"),
-              sliderInput('rt_window',
-                'RT window (minutes) for merging MS2 annotations with feature table',
-                0, 10, 1, 0.1, post=" min")
-            )
-          ),
-
-          gobttn('go', 'GIMME IDs!')
-        ), #end box side
-        box(status = "danger", width = 8,
-          uiOutput('result')
-        )
+        uiOutput('result')
       )) #dashboard body
     ) #page
   )# taglist
@@ -155,9 +161,7 @@ get_ui <- function(init_libs) {
 
 server <- function(input, output, session) {
   results <- reactiveVal()
-  output$result <- renderUI({
-    how_to_use()
-  })
+  output$result <- renderUI(input_controls_ui())
 
   libs <- get_libs()
   observeEvent(input$libmode, {
@@ -220,8 +224,11 @@ server <- function(input, output, session) {
     showNotification("Merging MS2 annotations with feature table", duration = 10)
     tbl <- merge_ms2(features, ms2_annotated, input$mz_window, input$rt_window)
   } else {
-    tbl <- ms2_annotated
+    tbl <- ms2_annotated %>% mutate(mz=precursor, rt=ms2_rt) %>%
+      select(mz, rt, everything())
   }
+
+  showNotification("Rendering results", duration = 10)
   tbl
 }
 

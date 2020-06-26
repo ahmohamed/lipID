@@ -1,17 +1,19 @@
 .results_plot_ui <- function() {
   renderUI({
-    tabBox(width = NULL, id = "input_tabs",
-      tabPanel("Feature Explorer",
-        plotlyOutput("plot"),
-        shinyjs::disabled(
-          actionBttn('update_annot', "Use selected molecule", style="bordered")
+    box(status = "danger", width = 12,
+      tabBox(width = NULL, id = "input_tabs",
+        tabPanel("Feature Explorer",
+          plotlyOutput("plot"),
+          shinyjs::disabled(
+            actionBttn('update_annot', "Use selected molecule", style="bordered")
+          ),
+          br(),
+          DTOutput('feature_tbl')
         ),
-        br(),
-        DTOutput('feature_tbl')
-      ),
-      tabPanel("Results table",
-        downloadButton("tbldld","Download all results"),
-        DTOutput('tbl')
+        tabPanel("Results table",
+          downloadButton("tbldld","Download all results"),
+          DTOutput('tbl')
+        )
       )
     )
   })
