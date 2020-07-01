@@ -26,6 +26,9 @@
 #' satisfied some, but not all of the rules to be retained. Default is `1`,
 #' returning molecules with 100\% match. Set to `0` to include molecules
 #' that are MS1 matched as well (i.e no rules are net, only the precursor).
+#' @param kmd_cutoff Maximum tolerated error between the number of
+#' double bonds in a matched lipid and the expected number, as caculated
+#' from Referenced Kendrick Mass Defect.
 #'
 #' @return A data frame with these columns:\itemize{
 #'     \item ms2_file, precursor, ms2_rt   File, precursor M/Z, precursor RT
@@ -46,7 +49,8 @@
 #' annotated <- lipID(ms2_file, libs, features_file)
 #' head(annotated)
 lipID <- function(ms2_files, libs, features = NULL,
-  ppm_tol=30, intensity_cutoff = 1000, mz_window=1, rt_window=2,
+  ppm_tol=30, intensity_cutoff = 1000, kmd_cutoff = 0.2,
+  mz_window=1, rt_window=2,
   collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only", "none"),
   partial_match_cutoff=1) {
   ms2_data <- read_ms2(ms2_files)
@@ -54,10 +58,11 @@ lipID <- function(ms2_files, libs, features = NULL,
     filter(partial_match >= partial_match_cutoff)
 
   if (is.null(features)) {
-    return(ms2_annotated)
+    return(match_kmd(ms2_annotated, kmd_cutoff))
   }
   features <- readr::read_csv(features)
-  merge_ms2(features, ms2_annotated, mz_window, rt_window)
+  merge_ms2(features, ms2_annotated, mz_window, rt_window) %>%
+    match_kmd(kmd_cutoff)
 }
 
 

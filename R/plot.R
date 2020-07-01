@@ -17,12 +17,15 @@ plot_features <- function(results,
     summarise_all(first) %>%
     mutate(
       annotated = ifelse(is.na(name), "Not annotated", "Annotated"),
-      class_name = ifelse(is.na(class_name), "Not annotated", class_name)
+      class_name = ifelse(
+        is.na(class_name),
+        "Not annotated", sub("(.{40}).*$", "\\1...", class_name))
     )
 
   if (!"assigement" %in% colnames(results)) {
     results$assigement = ifelse(is.na(results$name), "Not Assigned", "Auto Assigned")
   }
+  # TODO: Allow MS2_file res
   results <- rename(results, mz=1, rt=2)
   results$color_by <- results[[color_by]]
 
@@ -47,7 +50,7 @@ plot_features <- function(results,
 .get_colors <- function(values) {
   values <- na.omit(unique(values))
   cols <- colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(length(values))
-  names(cols) <- values
+  names(cols) <- sub("(.{40}).*$", "\\1...", values)
   cols
 }
 
