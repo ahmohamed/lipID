@@ -8,6 +8,15 @@
 #'
 #' @return interactive plot
 #' @export
+#' ms2_file <- system.file("extdata", "ms2file.ms2", package = "lipID")
+#' libs <- get_libs()
+#' annotated_ms2 <- lipID(ms2_file, libs, partial_match_cutoff = 0)
+#' plot_features(annotated_ms2)
+#'
+#' ## With MS1 data
+#' features_file <- system.file("extdata", "features.csv", package = "lipID")
+#' annotated_features <- lipID(ms2_file, libs, features_file)
+#' plot_features(annotated_features)
 plot_features <- function(results,
   color_by = c("class_name", "annotated", "assigement")) {
   color_by = match.arg(color_by)

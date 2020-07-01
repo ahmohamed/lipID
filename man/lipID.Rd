@@ -5,9 +5,9 @@
 \title{Annotate untargeted lipidomics using rule-based matching}
 \usage{
 lipID(ms2_files, libs, features = NULL, ppm_tol = 30,
-  intensity_cutoff = 1000, mz_window = 1, rt_window = 2,
-  collapse = TRUE, odd_chain = FALSE, chain_modifs = c("all", "only",
-  "none"), partial_match_cutoff = 1)
+  intensity_cutoff = 1000, kmd_cutoff = 0.2, mz_window = 1,
+  rt_window = 2, collapse = TRUE, odd_chain = FALSE,
+  chain_modifs = c("all", "only", "none"), partial_match_cutoff = 1)
 }
 \arguments{
 \item{ms2_files}{a character vector of file names or directory
@@ -24,6 +24,10 @@ library. Default tolerance is 30 ppm.}
 
 \item{intensity_cutoff}{Minimum intensity value for MS2 fragments to be
 taken into account when matching. Default is 1000}
+
+\item{kmd_cutoff}{Maximum tolerated error between the number of
+double bonds in a matched lipid and the expected number, as caculated
+from Referenced Kendrick Mass Defect.}
 
 \item{mz_window}{M/Z window for merging MS2 data with MS1 features.
 Ignored if \code{features} is \code{NULL}.}
