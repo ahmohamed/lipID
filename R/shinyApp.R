@@ -83,6 +83,7 @@ input_controls_ui <- function() {
           ),
           numericInput('ppm_tol', 'MS2 matching tolerance (PPM)', 30, 0, 1000),
           numericInput('intensity_cutoff', 'MS2 fragment intensity cutoff', 100, 0, 100000),
+          numericInput('kmd_cutoff', 'Referenced KMD Tolerance', 0.2, 0, 2, 0.01),
           sliderInput('partial_match_cutoff', 'Partial matching cutoff', 0, 100, 100, 1, post = "%")
         ),
         tabPanel("Library",
@@ -216,15 +217,19 @@ server <- function(input, output, session) {
   ms2_annotated <- match_ms2(
     ms2_data, selected_libs,
     ppm_tol = input$ppm_tol, intensity_cutoff = input$intensity_cutoff,
+    kmd_cutoff = input$kmd_cutoff,
     collapse = input$sum_comp, odd_chain = input$odd_chain, chain_modifs = input$modifs
   ) %>%
     filter(partial_match >= (input$partial_match_cutoff/100))
 
   if(!is.null(input$features_file)){
     showNotification("Merging MS2 annotations with feature table", duration = 10)
-    tbl <- merge_ms2(features, ms2_annotated, input$mz_window, input$rt_window)
+    tbl <- merge_ms2(features, ms2_annotated, input$mz_window, input$rt_window) %>%
+      match_kmd(input$kmd_cutoff)
   } else {
-    tbl <- ms2_annotated %>% mutate(mz=precursor, rt=ms2_rt) %>%
+    tbl <- ms2_annotated %>%
+      match_kmd(input$kmd_cutoff)
+      mutate(mz=precursor, rt=ms2_rt) %>%
       select(mz, rt, everything())
   }
 
