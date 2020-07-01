@@ -12,27 +12,33 @@ plot_features <- function(results,
   color_by = c("class_name", "annotated", "assigement")) {
   color_by = match.arg(color_by)
   colors <- .get_colors(results[[color_by]])
+
+  if (colnames(results)[[1]] == "ms2_file") { # MS2 only matching
+    results <- results %>% mutate(mz=precursor, rt=ms2_rt) %>%
+      select(mz, rt, everything())
+  }
+
   results = results %>%
     group_by_at(vars(1,2)) %>% arrange(-best_match) %>%
     summarise_all(first) %>%
     mutate(
-      annotated = ifelse(is.na(name), "Not annotated", "Annotated"),
+      annotated = ifelse(is.na(name) | !best_match, "Not annotated", "Annotated"),
       class_name = ifelse(
         is.na(class_name),
         "Not annotated", sub("(.{40}).*$", "\\1...", class_name))
     )
 
   if (!"assigement" %in% colnames(results)) {
-    results$assigement = ifelse(is.na(results$name), "Not Assigned", "Auto Assigned")
+    results$assigement = ifelse(results$annotated == "Not annotated", "Not Assigned", "Auto Assigned")
   }
   # TODO: Allow MS2_file res
   results <- rename(results, mz=1, rt=2)
   results$color_by <- results[[color_by]]
 
   plot_ly(size=I(35), hoverinfo="text", colors = colors) %>%
-    add_markers(data=highlight_key(results %>% filter(is.na(name)), ~mz+rt),
+    add_markers(data=highlight_key(results %>% filter(annotated == "Not annotated"), ~mz+rt),
       x= ~rt, y= ~mz, color=I("grey"), text = "Not Annotated", name="Not Annotated", mode="markers", visible="legendonly") %>%
-    add_markers(data = highlight_key(results %>% filter(!is.na(name)), ~mz+rt),
+    add_markers(data = highlight_key(results %>% filter(annotated != "Not annotated"), ~mz+rt),
       x= ~rt, y= ~mz, color= ~color_by, text= ~name, mode="markers") %>%
     highlight(
       off='plotly_doubleclick', color="red",

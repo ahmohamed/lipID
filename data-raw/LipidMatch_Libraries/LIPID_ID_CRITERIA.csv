@@ -154,7 +154,7 @@ OxPE_neg_minH_MSDIAL.csv,6,3;4;5,TRUE,TRUE,FALSE,Neg,[M-H]-,oxidized phosphatidy
 OxPG_neg_minH_MSDIAL.csv,6,3;4;5,TRUE,TRUE,FALSE,Neg,[M-H]-,oxidized phosphatidylglycerol
 OxPI_neg_minH_MSDIAL.csv,2;3;7,,TRUE,TRUE,FALSE,Neg,[M-H]-,oxidized phosphatidylinositol
 OxPS_neg_minH_MSDIAL.csv,3;7,,TRUE,TRUE,FALSE,Neg,[M-H]-,oxidized phosphatidylserine
-SQDG_NH4.csv,7;8,,TRUE,TRUE,FALSE,Pos,[M+NH4]+,Sulfoquinovosyl diacylglycerol 
+SQDG_NH4.csv,7;8,,TRUE,TRUE,FALSE,Pos,[M+NH4]+,Sulfoquinovosyl diacylglycerol
 SM_neg_C2H3O2.csv,3;4;5,,FALSE,FALSE,FALSE,Neg,[M+C2H3O2]-,Sphingomyelin
 Cer_H.csv,3;6,,FALSE,FALSE,FALSE,Pos,[M+H]+,Ceramide
 Cer_neg_HCO2.csv,3;5,,FALSE,FALSE,FALSE,Neg,[M+HCO2]-,Ceramide

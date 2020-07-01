@@ -62,7 +62,8 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
       rules <- libs[libs$file == .$file[[1]],]
       left_join(.,
         rules$ions[[1]] %>% rename(name=1) %>%
-          tidyr::gather("lib_ion", "lib_mz", -1, -sum_composition, -odd_chain, -modifs) %>%
+          tidyr::gather("lib_ion", "lib_mz",
+            -1, -sum_composition, -odd_chain, -modifs, -total_cl, -total_cs) %>%
           mutate(
             and_cols=lib_ion %in% unlist(rules$and_cols),
             or_cols=lib_ion %in% unlist(rules$or_cols),
@@ -110,16 +111,15 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
       "Try using a different library configuration.")
   }
 
-  ret <- ret %>% group_by(ms2_file, precursor, ms2_rt, file, class_name, name) %>%
+  ret <- ret %>% group_by(
+    ms2_file, precursor, ms2_rt, file, class_name,
+    name, sum_composition, odd_chain, modifs, total_cl, total_cs) %>%
     summarise(
       n_and = dplyr::first(n_and), n_or = dplyr::first(n_or),
       n_and_true = sum(!is.na(ms2_intensity[and_cols])),
       n_or_true = sum(!is.na(ms2_intensity[or_cols])),
       ions_matched = paste(lib_ion[!is.na(ms2_intensity)], collapse = ";"), # all ions matched, including non-ruled
-      fragments_intensity = sum(ms2_intensity, na.rm = TRUE), # all ions matched, including non-ruled
-      sum_composition = first(sum_composition),
-      odd_chain = first(odd_chain),
-      modifs = first(modifs)
+      fragments_intensity = sum(ms2_intensity, na.rm = TRUE) # all ions matched, including non-ruled
     ) %>%
     mutate(
       and_cols = n_and == n_and_true,
@@ -136,8 +136,10 @@ match_ms2 <- function(ms2, libs, ppm_tol=30, intensity_cutoff = 1000,
     ret <- .collapse_sum_composition(ret)
   }
 
-  ret %>% arrange(-partial_match, -fragments_intensity) %>%
-    mutate(best_match = row_number() == 1)
+  ret %>%
+    group_by(ms2_file, precursor, ms2_rt) %>%
+    arrange(-partial_match, -fragments_intensity) %>%
+    mutate(best_match = row_number() == 1) %>% ungroup()
 }
 
 
@@ -206,6 +208,7 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2, output = c("
     group_by_at(vars(1,2)) %>%
     arrange(-nearest_ms2, -partial_match, -fragments_intensity) %>%
     mutate(best_match = row_number() == 1) %>%
+    ungroup() %>%
     select(1,2, name, ms2_file, precursor, ms2_rt, best_match, partial_match, confirmed, ions_matched, fragments_intensity, everything())
 
   if (match.arg(output) == 'best_match') {
@@ -215,8 +218,8 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2, output = c("
 }
 
 .collapse_sum_composition <- function(df){
-  dups <- df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition) %>%
-    filter(confirmed, dplyr::n() >1, !is.na(sum_composition))
+  dups <- df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition, partial_match) %>%
+    filter(dplyr::n() >1, !is.na(sum_composition))
 
   if (nrow(dups) == 0) {
     return (df)
@@ -233,8 +236,8 @@ merge_ms2 <- function(features, ms2_data, mz_window=1, rt_window=2, output = c("
     ) %>%
     summarise_all(first)
 
-  df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition) %>%
-    filter(!confirmed | dplyr::n() < 2 | is.na(sum_composition)) %>%
+  df %>% group_by(ms2_file, precursor, ms2_rt, sum_composition, partial_match) %>%
+    filter(dplyr::n() < 2 | is.na(sum_composition)) %>%
     ungroup() %>%
     bind_rows(summed)
 }
