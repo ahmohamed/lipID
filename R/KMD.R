@@ -1,6 +1,6 @@
 #' Optimize matching lipids using Referenced Kendrick Mass Defects
 #'
-#' @param .data Annotated features obtoined from `[match_ms1]`,
+#' @param results Annotated features obtoined from `[match_ms1]`,
 #' `[match_ms2]` or `[merge_ms2]`.
 #' @param kmd_cutoff Maximum tolerated error between the number of
 #' double bonds in a matched lipid and the expected number, as caculated
@@ -21,6 +21,9 @@
 #' match_kmd(confirmed_molecules, kmd_cutoff = 0.2)
 #'
 #' ## With MS1 features
+#' features_file <- system.file("extdata", "features.csv", package = "lipID")
+#' features <- readr::read_csv(features_file)
+#'
 #' annotated_features <- merge_ms2(features, confirmed_molecules)
 #' match_kmd(annotated_features, kmd_cutoff = 0.2)
 match_kmd <- function(results, kmd_cutoff = 0.2) {
@@ -51,9 +54,14 @@ match_kmd <- function(results, kmd_cutoff = 0.2) {
   }
 }
 
-#' @export
-plot_kmd <- function(results) {
-  results %>% filter(!is.na(best_match)) %>%
-    ggplot(kmd, aes(file, cs_residual)) + geom_boxplot() + facet_grid(best_match~.)
-}
+#' #' @export
+#' plot_kmd <- function(results) {
+#'   results %>% dplyr::filter(!is.na(best_match)) %>%
+#'     ggplot(results, aes(file, cs_residual)) + geom_boxplot() + facet_grid(best_match~.)
+#' }
 
+
+# colnames used internally
+utils::globalVariables(c(
+  "classkmd", "KMD", "cs_residual", "cs_matched", "expected_cs"
+))

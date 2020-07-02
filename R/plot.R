@@ -69,3 +69,7 @@ plot_features <- function(results,
   cols
 }
 
+# colnames used internally
+utils::globalVariables(c(
+  "annotated"
+))

@@ -7,12 +7,12 @@
 match_kmd(results, kmd_cutoff = 0.2)
 }
 \arguments{
+\item{results}{Annotated features obtoined from \code{[match_ms1]},
+\code{[match_ms2]} or \code{[merge_ms2]}.}
+
 \item{kmd_cutoff}{Maximum tolerated error between the number of
 double bonds in a matched lipid and the expected number, as caculated
 from Referenced Kendrick Mass Defect.}
-
-\item{.data}{Annotated features obtoined from \code{[match_ms1]},
-\code{[match_ms2]} or \code{[merge_ms2]}.}
 }
 \value{
 Annotated features with \code{best_match} updated to only
@@ -32,6 +32,9 @@ confirmed_molecules <- match_ms2(ms2_data, libs)
 match_kmd(confirmed_molecules, kmd_cutoff = 0.2)
 
 ## With MS1 features
+features_file <- system.file("extdata", "features.csv", package = "lipID")
+features <- readr::read_csv(features_file)
+
 annotated_features <- merge_ms2(features, confirmed_molecules)
 match_kmd(annotated_features, kmd_cutoff = 0.2)
 }

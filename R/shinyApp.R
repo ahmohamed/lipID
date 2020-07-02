@@ -217,7 +217,6 @@ server <- function(input, output, session) {
   ms2_annotated <- match_ms2(
     ms2_data, selected_libs,
     ppm_tol = input$ppm_tol, intensity_cutoff = input$intensity_cutoff,
-    kmd_cutoff = input$kmd_cutoff,
     collapse = input$sum_comp, odd_chain = input$odd_chain, chain_modifs = input$modifs
   ) %>%
     filter(partial_match >= (input$partial_match_cutoff/100))
